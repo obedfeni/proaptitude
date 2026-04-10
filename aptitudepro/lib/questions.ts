@@ -410,14 +410,36 @@ export function weightedSample(questions: Question[], n: number, excludeIds: str
   return result;
 }
 
-export function buildBlendedTest(category: string, count: number): Question[] {
+export function buildBlendedTest(category: string, count: number, excludeIds: string[] = []): Question[] {
   const questions = QUESTION_BANK[category] || [];
   if (questions.length === 0) return [];
-  return [...questions].sort((a, b) => {
-    const sA = (a.timesAsked+1)*(a.timesCorrect/Math.max(a.timesAsked,1)||0.5);
-    const sB = (b.timesAsked+1)*(b.timesCorrect/Math.max(b.timesAsked,1)||0.5);
-    return sA - sB;
-  }).slice(0, count);
+  
+  // Filter out recently asked questions
+  const available = questions.filter(q => !excludeIds.includes(q.id));
+  const pool = available.length > 0 ? available : questions;
+  
+  // Adaptive scoring: prioritize questions with low accuracy and low frequency
+  const scored = pool.map(q => {
+    const accuracy = q.timesAsked > 0 ? q.timesCorrect / q.timesAsked : 0;
+    const frequencyPenalty = Math.min(q.timesAsked / 10, 1); // Max penalty after 10 attempts
+    const recencyPenalty = excludeIds.includes(q.id) ? 0.3 : 1;
+    
+    // Lower score = higher priority (needs more practice)
+    const score = (accuracy * 0.4) + (frequencyPenalty * 0.3) - (q.weight * 0.3);
+    return { question: q, score: score * recencyPenalty };
+  });
+  
+  // Sort by score (ascending) and take top questions
+  scored.sort((a, b) => a.score - b.score);
+  const selected = scored.slice(0, Math.min(count, scored.length)).map(s => s.question);
+  
+  // Shuffle to prevent exact repetition order
+  for (let i = selected.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [selected[i], selected[j]] = [selected[j], selected[i]];
+  }
+  
+  return selected;
 }
 
 export function updateWeights(results: {questionId: string; correct: boolean}[]): void {
@@ -427,7 +449,26 @@ export function updateWeights(results: {questionId: string; correct: boolean}[])
     if (q) {
       q.timesAsked++;
       if (correct) q.timesCorrect++;
-      q.weight = 0.5 + (1 - q.timesCorrect / q.timesAsked);
+      
+      // Adaptive weight calculation
+      const accuracy = q.timesCorrect / q.timesAsked;
+      const frequencyPenalty = Math.min(q.timesAsked / 10, 1);
+      
+      // Weight formula: prioritize questions that are:
+      // 1. Answered incorrectly (low accuracy)
+      // 2. Asked less frequently
+      q.weight = (1.5 - accuracy) * (1 - frequencyPenalty * 0.3) + 0.5;
+      
+      // Ensure minimum weight so questions don't disappear
+      if (q.weight < 0.3) q.weight = 0.3;
     }
   });
+}
+export function getLeastAskedQuestions(category: string, count: number): string[] {
+  const questions = QUESTION_BANK[category] || [];
+  return questions
+    .map(q => ({ id: q.id, timesAsked: q.timesAsked }))
+    .sort((a, b) => a.timesAsked - b.timesAsked)
+    .slice(0, count)
+    .map(q => q.id);
 }
