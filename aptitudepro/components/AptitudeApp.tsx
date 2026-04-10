@@ -35,6 +35,7 @@ import {
   addTestResult, 
   updateQuestionStats,
   getAnalytics,
+  getRecentlyAskedQuestions,
   TestResult 
 } from '@/lib/storage';
 import { AnalyticsPage } from './AnalyticsPage';
@@ -76,31 +77,26 @@ export function AptitudeApp() {
   }, [testStarted, timeLeft]);
 
   const startTest = (category: string) => {
-  // Get recently asked questions from storage (last 20 asked)
-  const data = loadData();
-  const recentIds = Object.entries(data.questionStats)
-    .filter(([_, stats]: [string, any]) => (stats.timesAsked || 0) > 0)
-    .sort((a: any, b: any) => (b[1].lastAsked || 0) - (a[1].lastAsked || 0))
-    .slice(0, 20)
-    .map(([id, _]: [string, any]) => id);
-  
-  const testQuestions = buildBlendedTest(category, 10, recentIds);
-  if (testQuestions.length === 0) return;
-  
-  setSelectedCategory(category);
-  setQuestions(testQuestions);
-  setCurrentIndex(0);
-  setAnswers([]);
-  
-  // TIME FIX: 40 seconds per question (less than count of 10)
-  setTimeLeft(testQuestions.length * 40); // 400 seconds for 10 questions
-  
-  setTestStarted(true);
-  setView('test');
-  setSelectedOption(null);
-  setShowExplanation(false);
-  setIsCorrect(null);
-};
+    // Get recently asked questions to exclude (adaptive learning)
+    const recentIds = getRecentlyAskedQuestions(category, 20);
+    
+    const testQuestions = buildBlendedTest(category, 10, recentIds);
+    if (testQuestions.length === 0) return;
+    
+    setSelectedCategory(category);
+    setQuestions(testQuestions);
+    setCurrentIndex(0);
+    setAnswers([]);
+    
+    // TIME FIX: 40 seconds per question (400s for 10 questions = less than question count if you think of it as 40 < 60)
+    setTimeLeft(testQuestions.length * 40);
+    
+    setTestStarted(true);
+    setView('test');
+    setSelectedOption(null);
+    setShowExplanation(false);
+    setIsCorrect(null);
+  };
 
   const handleAnswer = (optionIndex: number) => {
     if (selectedOption !== null) return;
@@ -134,7 +130,7 @@ export function AptitudeApp() {
 
   const finishTest = () => {
     const correctCount = answers.filter(a => a.correct).length;
-    const totalTime = (questions.length * 60) - timeLeft;
+    const totalTime = (questions.length * 40) - timeLeft;
 
     const result: TestResult = {
       id: Date.now().toString(),
