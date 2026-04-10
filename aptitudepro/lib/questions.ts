@@ -369,7 +369,63 @@ export function buildQuestionBank(): QuestionBank {
   addQ('electrical',{difficulty:4,question:"A 5 MW wind turbine operates at 35% capacity factor. Annual energy output?",options:["7.665 GWh","15.33 GWh","43.8 GWh","153.3 GWh"],correct:1,explanation:"Energy = 5 MW × 0.35 × 8,760 h = 15,330 MWh = 15.33 GWh."});
   addQ('electrical',{difficulty:3,question:"Which renewable energy source has the highest energy density?",options:["Wind","Solar PV","Geothermal","Tidal"],correct:2,explanation:"Geothermal energy taps Earth's internal heat — high availability and consistent output compared to intermittent sources."});
   addQ('electrical',{difficulty:2,question:"The inverter in a solar PV system converts:",options:["AC to DC","DC to AC","High voltage AC to low voltage AC","DC to higher DC voltage"],correct:1,explanation:"Inverters convert the DC output of solar panels to grid-compatible AC."});
+  // — Advanced circuit analysis (5) —
+addQ('electrical',{difficulty:5,question:"In a series RLC circuit at resonance, which statement is true?",options:["Impedance is minimum and purely resistive","Impedance is maximum","Current is zero","Power factor is zero"],correct:0,explanation:"At resonance, XL = XC, impedance Z = R (minimum), and power factor = 1."});
+addQ('electrical',{difficulty:5,question:"A circuit has impedance Z = 3 + j4 Ω. The power factor is:",options:["0.6 lagging","0.8 lagging","0.6 leading","0.8 leading"],correct:0,explanation:"|Z|=5, PF = R/Z = 3/5 = 0.6, inductive → lagging."});
 
+addQ('electrical',{difficulty:5,question:"Maximum power transfer occurs when load resistance equals:",options:["Source resistance","Twice source resistance","Half source resistance","Zero"],correct:0,explanation:"Maximum power transfer theorem: RL = Rth."});
+
+addQ('electrical',{difficulty:5,question:"In nodal analysis, the number of independent equations equals:",options:["Number of branches","Number of nodes","Number of non-reference nodes","Number of loops"],correct:2,explanation:"Number of nodal equations = N - 1 (excluding reference node)."});
+
+addQ('electrical',{difficulty:5,question:"Superposition theorem is applicable only to:",options:["Linear circuits","Nonlinear circuits","AC circuits only","DC circuits only"],correct:0,explanation:"Superposition works only in linear systems."});
+
+
+// — Control systems (5) —
+addQ('electrical',{difficulty:5,question:"A system is stable if all poles of its transfer function are:",options:["On imaginary axis","In right half plane","In left half plane","At origin"],correct:2,explanation:"For stability, all poles must lie in the left half of s-plane."});
+
+addQ('electrical',{difficulty:5,question:"The steady-state error of a Type-1 system for step input is:",options:["Infinity","Zero","Finite","Oscillatory"],correct:1,explanation:"Type-1 system has zero steady-state error for step input."});
+
+addQ('electrical',{difficulty:5,question:"Gain margin is measured at the frequency where:",options:["Phase = -180°","Magnitude = 1","Phase = 0°","Magnitude = 0"],correct:0,explanation:"Gain margin is evaluated at phase crossover frequency (phase = -180°)."});
+
+addQ('electrical',{difficulty:5,question:"Increasing damping ratio in a second-order system results in:",options:["More overshoot","Less overshoot","Higher oscillation","Instability"],correct:1,explanation:"Higher damping reduces oscillations and overshoot."});
+
+addQ('electrical',{difficulty:5,question:"The root locus shows:",options:["Time response","Frequency response","Pole movement with gain","Phase margin"],correct:2,explanation:"Root locus plots system poles as gain varies."});
+
+
+// — Electrical machines (5) —
+addQ('electrical',{difficulty:5,question:"Slip of an induction motor at synchronous speed is:",options:["1","0","0.5","-1"],correct:1,explanation:"Slip s = (Ns - N)/Ns. At Ns → s = 0."});
+
+addQ('electrical',{difficulty:5,question:"Maximum torque in an induction motor occurs when:",options:["Rotor resistance = stator resistance","Rotor reactance = rotor resistance","Slip = 1","Rotor resistance = rotor reactance"],correct:3,explanation:"Condition for max torque: R2 = X2."});
+
+addQ('electrical',{difficulty:5,question:"In a transformer, core losses depend mainly on:",options:["Load current","Voltage and frequency","Resistance","Temperature only"],correct:1,explanation:"Core losses (hysteresis + eddy) depend on voltage & frequency."});
+
+addQ('electrical',{difficulty:5,question:"Back EMF in a DC motor is proportional to:",options:["Flux only","Speed only","Flux × speed","Armature current"],correct:2,explanation:"Eb = kΦω."});
+
+addQ('electrical',{difficulty:5,question:"A synchronous motor operates at:",options:["Below synchronous speed","Above synchronous speed","Exactly synchronous speed","Variable speed"],correct:2,explanation:"Speed is locked to supply frequency."});
+
+
+// — Power systems (5) —
+addQ('electrical',{difficulty:5,question:"Ferranti effect occurs in:",options:["Short lines","Medium lines","Long transmission lines","DC lines"],correct:2,explanation:"Ferranti effect is prominent in long AC transmission lines due to capacitance."});
+
+addQ('electrical',{difficulty:5,question:"Per-unit system simplifies calculations by:",options:["Eliminating units","Normalizing values","Reducing voltage","Increasing current"],correct:1,explanation:"All quantities are expressed as fractions of base values."});
+
+addQ('electrical',{difficulty:5,question:"Load flow analysis is used to determine:",options:["Fault currents","Voltage profile","Transient stability","Insulation failure"],correct:1,explanation:"Load flow gives bus voltages, power flows, etc."});
+
+addQ('electrical',{difficulty:5,question:"Corona loss depends strongly on:",options:["Voltage","Frequency","Conductor diameter","All of the above"],correct:3,explanation:"Corona depends on voltage, air conditions, conductor size, etc."});
+
+addQ('electrical',{difficulty:5,question:"Skin effect causes:",options:["Uniform current distribution","Higher resistance at DC","Current concentration near surface","Lower resistance"],correct:2,explanation:"AC current flows near conductor surface at high frequency."});
+
+
+// — Power electronics (5) —
+addQ('electrical',{difficulty:5,question:"A fully controlled rectifier uses:",options:["Diodes only","SCRs only","Transistors","Capacitors"],correct:1,explanation:"Fully controlled rectifiers use SCRs for phase control."});
+
+addQ('electrical',{difficulty:5,question:"Firing angle in SCR controls:",options:["Voltage output","Frequency","Resistance","Inductance"],correct:0,explanation:"Adjusting firing angle controls average output voltage."});
+
+addQ('electrical',{difficulty:5,question:"In a chopper circuit, duty cycle controls:",options:["Frequency","Output voltage","Current ripple","Switching loss"],correct:1,explanation:"Vout proportional to duty cycle."});
+
+addQ('electrical',{difficulty:5,question:"An inverter converts:",options:["AC to DC","DC to AC","AC to AC","DC to DC"],correct:1,explanation:"Inverters convert DC into AC power."});
+
+addQ('electrical',{difficulty:5,question:"PWM technique is used to:",options:["Reduce voltage only","Control power efficiently","Increase resistance","Eliminate harmonics completely"],correct:1,explanation:"PWM improves efficiency and controls output."});
   return bank;
 }
 
