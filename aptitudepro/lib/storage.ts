@@ -9,9 +9,16 @@ export interface TestResult {
   answers: { questionId: string; correct: boolean; selectedOption: number }[];
 }
 
+export interface QuestionStats {
+  timesAsked: number;
+  timesCorrect: number;
+  weight: number;
+  lastAsked?: number;  // Optional: timestamp of when last asked
+}
+
 export interface AppData {
   results: TestResult[];
-  questionStats: Record<string, { timesAsked: number; timesCorrect: number; weight: number }>;
+  questionStats: Record<string, QuestionStats>;
   lastVisit: string;
   streakDays: number;
   totalTestsTaken: number;
@@ -78,17 +85,44 @@ export function addTestResult(result: TestResult): void {
 export function updateQuestionStats(questionId: string, correct: boolean): void {
   const data = loadData();
   if (!data.questionStats[questionId]) {
-    data.questionStats[questionId] = { timesAsked: 0, timesCorrect: 0, weight: 1.0, lastAsked: 0 };
+    data.questionStats[questionId] = { timesAsked: 0, timesCorrect: 0, weight: 1.0 };
   }
-  data.questionStats[questionId].timesAsked++;
-  data.questionStats[questionId].lastAsked = Date.now(); // Add this line
-  if (correct) {
-    data.questionStats[questionId].timesCorrect++;
-  }
+  
   const stats = data.questionStats[questionId];
+  stats.timesAsked++;
+  stats.lastAsked = Date.now();  // Track when question was last asked
+  if (correct) {
+    stats.timesCorrect++;
+  }
+  
+  // Adaptive weight calculation
   const accuracy = stats.timesCorrect / stats.timesAsked;
-  stats.weight = 0.5 + (1 - accuracy);
+  const frequencyPenalty = Math.min(stats.timesAsked / 10, 1);
+  
+  // Weight formula: prioritize questions with low accuracy and low frequency
+  stats.weight = (1.5 - accuracy) * (1 - frequencyPenalty * 0.3) + 0.5;
+  
+  // Ensure minimum weight
+  if (stats.weight < 0.3) stats.weight = 0.3;
+  
   saveData(data);
+}
+
+export function getRecentlyAskedQuestions(category: string, limit: number = 20): string[] {
+  const data = loadData();
+  return Object.entries(data.questionStats)
+    .filter(([_, stats]) => stats.lastAsked && stats.lastAsked > 0)
+    .sort((a, b) => (b[1].lastAsked || 0) - (a[1].lastAsked || 0))
+    .slice(0, limit)
+    .map(([id, _]) => id);
+}
+
+export function getLeastAskedQuestions(category: string, count: number): string[] {
+  const data = loadData();
+  return Object.entries(data.questionStats)
+    .sort((a, b) => (a[1].timesAsked || 0) - (b[1].timesAsked || 0))
+    .slice(0, count)
+    .map(([id, _]) => id);
 }
 
 export function getAnalytics(): {
