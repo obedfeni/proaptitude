@@ -366,7 +366,7 @@ export function AptitudeApp() {
               {/* Table if exists */}
               {currentQ.table && (
                 <div 
-                  className="mb-6 overflow-x-auto"
+                  className="mb-6 overflow-x-auto bg-white rounded-lg border border-slate-200 p-4"
                   dangerouslySetInnerHTML={{ __html: currentQ.table }}
                 />
               )}
@@ -376,6 +376,7 @@ export function AptitudeApp() {
                 <div 
                   className="mb-6 flex justify-center"
                   dangerouslySetInnerHTML={{ __html: currentQ.diagram }}
+                  style={{ minHeight: '200px' }}
                 />
               )}
 
