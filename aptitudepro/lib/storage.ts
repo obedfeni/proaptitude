@@ -78,13 +78,13 @@ export function addTestResult(result: TestResult): void {
 export function updateQuestionStats(questionId: string, correct: boolean): void {
   const data = loadData();
   if (!data.questionStats[questionId]) {
-    data.questionStats[questionId] = { timesAsked: 0, timesCorrect: 0, weight: 1.0 };
+    data.questionStats[questionId] = { timesAsked: 0, timesCorrect: 0, weight: 1.0, lastAsked: 0 };
   }
   data.questionStats[questionId].timesAsked++;
+  data.questionStats[questionId].lastAsked = Date.now(); // Add this line
   if (correct) {
     data.questionStats[questionId].timesCorrect++;
   }
-  // Recalculate weight
   const stats = data.questionStats[questionId];
   const accuracy = stats.timesCorrect / stats.timesAsked;
   stats.weight = 0.5 + (1 - accuracy);
