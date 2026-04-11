@@ -39,6 +39,16 @@ import {
   TestResult 
 } from '@/lib/storage';
 import { AnalyticsPage } from './AnalyticsPage';
+import { 
+  loadData, 
+  saveData, 
+  addTestResult, 
+  updateQuestionStats,
+  getAnalytics,
+  getRecentlyAskedQuestions,
+  getCategoryStatsMap,  // ← ADD THIS
+  TestResult 
+} from '@/lib/storage';
 
 type View = 'home' | 'test' | 'result' | 'analytics' | 'guide';
 
@@ -76,21 +86,17 @@ export function AptitudeApp() {
     return () => clearInterval(timer);
   }, [testStarted, timeLeft]);
 
-  const startTest = (category: string) => {
-    // Get recently asked questions to exclude (adaptive learning)
-    const recentIds = getRecentlyAskedQuestions(category, 20);
-    
-    const testQuestions = buildBlendedTest(category, 10, recentIds);
+const startTest = (category: string) => {
+    const recentIds = getRecentlyAskedQuestions(category, 40);
+    const statsMap = getCategoryStatsMap(category);
+    const testQuestions = buildBlendedTest(category, 10, recentIds, statsMap);
     if (testQuestions.length === 0) return;
-    
+
     setSelectedCategory(category);
     setQuestions(testQuestions);
     setCurrentIndex(0);
     setAnswers([]);
-    
-    // TIME FIX: 40 seconds per question (400s for 10 questions = less than question count if you think of it as 40 < 60)
     setTimeLeft(testQuestions.length * 40);
-    
     setTestStarted(true);
     setView('test');
     setSelectedOption(null);
@@ -98,7 +104,7 @@ export function AptitudeApp() {
     setIsCorrect(null);
   };
 
-  const handleAnswer = (optionIndex: number) => {
+ const handleAnswer = (optionIndex: number) => {
     if (selectedOption !== null) return;
 
     const currentQ = questions[currentIndex];
@@ -108,7 +114,7 @@ export function AptitudeApp() {
     setIsCorrect(correct);
     setShowExplanation(true);
 
-    updateQuestionStats(currentQ.id, correct);
+    updateQuestionStats(currentQ.id, correct, currentQ.category); // ← category added
 
     setAnswers(prev => [...prev, {
       questionId: currentQ.id,
