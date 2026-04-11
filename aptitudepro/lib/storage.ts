@@ -209,3 +209,27 @@ export function getAnalytics(): {
     categoryPerformance,
   };
 }
+export function getCategoryStatsMap(category: string) {
+  if (typeof window === 'undefined') return {};
+
+  const raw = localStorage.getItem('questionStats');
+  if (!raw) return {};
+
+  const stats = JSON.parse(raw) as Record<string, {
+    timesAsked: number;
+    timesCorrect: number;
+    weight: number;
+    lastAsked: number;
+    category: string;
+  }>;
+
+  const filtered: Record<string, typeof stats[string]> = {};
+
+  Object.entries(stats).forEach(([id, stat]) => {
+    if (stat.category === category) {
+      filtered[id] = stat;
+    }
+  });
+
+  return filtered;
+}
