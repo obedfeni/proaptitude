@@ -36,9 +36,11 @@ import {
   updateQuestionStats,
   getAnalytics,
   getRecentlyAskedQuestions,
+  getCategoryStatsMap,
   TestResult 
 } from '@/lib/storage';
 import { AnalyticsPage } from './AnalyticsPage';
+
 type View = 'home' | 'test' | 'result' | 'analytics' | 'guide';
 
 export function AptitudeApp() {
@@ -75,7 +77,7 @@ export function AptitudeApp() {
     return () => clearInterval(timer);
   }, [testStarted, timeLeft]);
 
-const startTest = (category: string) => {
+  const startTest = (category: string) => {
     const recentIds = getRecentlyAskedQuestions(category, 40);
     const statsMap = getCategoryStatsMap(category);
     const testQuestions = buildBlendedTest(category, 10, recentIds, statsMap);
@@ -93,7 +95,7 @@ const startTest = (category: string) => {
     setIsCorrect(null);
   };
 
- const handleAnswer = (optionIndex: number) => {
+  const handleAnswer = (optionIndex: number) => {
     if (selectedOption !== null) return;
 
     const currentQ = questions[currentIndex];
@@ -103,7 +105,7 @@ const startTest = (category: string) => {
     setIsCorrect(correct);
     setShowExplanation(true);
 
-    updateQuestionStats(currentQ.id, correct, currentQ.category); // ← category added
+    updateQuestionStats(currentQ.id, correct, currentQ.category);
 
     setAnswers(prev => [...prev, {
       questionId: currentQ.id,
