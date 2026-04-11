@@ -39,17 +39,6 @@ import {
   TestResult 
 } from '@/lib/storage';
 import { AnalyticsPage } from './AnalyticsPage';
-import { 
-  loadData, 
-  saveData, 
-  addTestResult, 
-  updateQuestionStats,
-  getAnalytics,
-  getRecentlyAskedQuestions,
-  getCategoryStatsMap,  // ← ADD THIS
-  TestResult 
-} from '@/lib/storage';
-
 type View = 'home' | 'test' | 'result' | 'analytics' | 'guide';
 
 export function AptitudeApp() {
