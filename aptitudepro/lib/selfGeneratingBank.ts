@@ -2,11 +2,11 @@
 // Drop this file next to question.ts — no other changes needed.
 
 import {
-  Question,
+  questions,
   QuestionBank,
   QUESTION_BANK,
   buildBlendedTest,
-} from './question';
+} from './questions';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
