@@ -13,7 +13,8 @@ export interface QuestionStats {
   timesAsked: number;
   timesCorrect: number;
   weight: number;
-  lastAsked?: number;  // Optional: timestamp of when last asked
+  lastAsked: number;   // unix ms timestamp — 0 if never asked
+  category: string;    // FIX: store category so we can filter by it
 }
 
 export interface AppData {
@@ -27,9 +28,7 @@ export interface AppData {
 const STORAGE_KEY = 'aptitudepro_data';
 
 export function loadData(): AppData {
-  if (typeof window === 'undefined') {
-    return getDefaultData();
-  }
+  if (typeof window === 'undefined') return getDefaultData();
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
@@ -59,7 +58,7 @@ function getDefaultData(): AppData {
     questionStats: {},
     lastVisit: new Date().toISOString(),
     streakDays: 0,
-    totalTestsTaken: 0
+    totalTestsTaken: 0,
   };
 }
 
@@ -68,61 +67,79 @@ export function addTestResult(result: TestResult): void {
   data.results.push(result);
   data.totalTestsTaken++;
 
-  // Update streak
   const lastVisit = new Date(data.lastVisit);
   const today = new Date();
   const diffDays = Math.floor((today.getTime() - lastVisit.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 1) {
-    data.streakDays++;
-  } else if (diffDays > 1) {
-    data.streakDays = 1;
-  }
+  if (diffDays === 1) data.streakDays++;
+  else if (diffDays > 1) data.streakDays = 1;
 
   saveData(data);
 }
 
-export function updateQuestionStats(questionId: string, correct: boolean): void {
+/**
+ * Called after each answer — persists per-question stats to localStorage.
+ * category is now stored alongside each stat entry so exclusion can be scoped.
+ */
+export function updateQuestionStats(questionId: string, correct: boolean, category: string = ''): void {
   const data = loadData();
   if (!data.questionStats[questionId]) {
-    data.questionStats[questionId] = { timesAsked: 0, timesCorrect: 0, weight: 1.0 };
+    data.questionStats[questionId] = {
+      timesAsked: 0, timesCorrect: 0, weight: 1.0, lastAsked: 0, category,
+    };
   }
-  
+
   const stats = data.questionStats[questionId];
   stats.timesAsked++;
-  stats.lastAsked = Date.now();  // Track when question was last asked
-  if (correct) {
-    stats.timesCorrect++;
-  }
-  
-  // Adaptive weight calculation
+  stats.timesCorrect = (stats.timesCorrect || 0) + (correct ? 1 : 0);
+  stats.lastAsked = Date.now();
+  if (!stats.category) stats.category = category; // backfill for old records
+
   const accuracy = stats.timesCorrect / stats.timesAsked;
-  const frequencyPenalty = Math.min(stats.timesAsked / 10, 1);
-  
-  // Weight formula: prioritize questions with low accuracy and low frequency
-  stats.weight = (1.5 - accuracy) * (1 - frequencyPenalty * 0.3) + 0.5;
-  
-  // Ensure minimum weight
-  if (stats.weight < 0.3) stats.weight = 0.3;
-  
+  stats.weight = Math.max(0.3, (1.5 - accuracy) * (1 - Math.min(stats.timesAsked / 10, 1) * 0.3) + 0.5);
+
   saveData(data);
 }
 
-export function getRecentlyAskedQuestions(category: string, limit: number = 20): string[] {
+/**
+ * Returns the IDs of the most recently asked questions FOR THIS CATEGORY ONLY.
+ * This was the core bug — the old version ignored the category parameter entirely.
+ *
+ * @param category  Category key e.g. 'numerical'
+ * @param limit     How many recent IDs to exclude (default 40 — covers ~4 full tests)
+ */
+export function getRecentlyAskedQuestions(category: string, limit: number = 40): string[] {
   const data = loadData();
   return Object.entries(data.questionStats)
-    .filter(([_, stats]) => stats.lastAsked && stats.lastAsked > 0)
-    .sort((a, b) => (b[1].lastAsked || 0) - (a[1].lastAsked || 0))
+    .filter(([_, s]) => s.category === category && s.lastAsked > 0)
+    .sort((a, b) => b[1].lastAsked - a[1].lastAsked)
     .slice(0, limit)
-    .map(([id, _]) => id);
+    .map(([id]) => id);
+}
+
+/**
+ * Returns the full stats map for a category — passed into buildBlendedTest
+ * so adaptive scoring can use real persisted data (not just in-memory).
+ */
+export function getCategoryStatsMap(
+  category: string
+): Record<string, { timesAsked: number; timesCorrect: number }> {
+  const data = loadData();
+  const result: Record<string, { timesAsked: number; timesCorrect: number }> = {};
+  for (const [id, s] of Object.entries(data.questionStats)) {
+    if (s.category === category) {
+      result[id] = { timesAsked: s.timesAsked, timesCorrect: s.timesCorrect };
+    }
+  }
+  return result;
 }
 
 export function getLeastAskedQuestions(category: string, count: number): string[] {
   const data = loadData();
   return Object.entries(data.questionStats)
+    .filter(([_, s]) => s.category === category)
     .sort((a, b) => (a[1].timesAsked || 0) - (b[1].timesAsked || 0))
     .slice(0, count)
-    .map(([id, _]) => id);
+    .map(([id]) => id);
 }
 
 export function getAnalytics(): {
@@ -138,12 +155,8 @@ export function getAnalytics(): {
 
   if (results.length === 0) {
     return {
-      totalTests: 0,
-      averageScore: 0,
-      bestCategory: 'N/A',
-      streakDays: data.streakDays,
-      recentResults: [],
-      categoryPerformance: {}
+      totalTests: 0, averageScore: 0, bestCategory: 'N/A',
+      streakDays: data.streakDays, recentResults: [], categoryPerformance: {},
     };
   }
 
@@ -152,9 +165,7 @@ export function getAnalytics(): {
 
   const categoryStats: Record<string, { total: number; count: number }> = {};
   results.forEach(r => {
-    if (!categoryStats[r.category]) {
-      categoryStats[r.category] = { total: 0, count: 0 };
-    }
+    if (!categoryStats[r.category]) categoryStats[r.category] = { total: 0, count: 0 };
     categoryStats[r.category].total += r.percentage;
     categoryStats[r.category].count++;
   });
@@ -168,11 +179,9 @@ export function getAnalytics(): {
     .sort((a, b) => b[1].avg - a[1].avg)[0]?.[0] || 'N/A';
 
   return {
-    totalTests,
-    averageScore,
-    bestCategory,
+    totalTests, averageScore, bestCategory,
     streakDays: data.streakDays,
     recentResults: results.slice(-10).reverse(),
-    categoryPerformance
+    categoryPerformance,
   };
 }
