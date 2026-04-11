@@ -2,7 +2,7 @@
 // Drop this file next to question.ts — no other changes needed.
 
 import {
-  questions,
+  Questions,
   QuestionBank,
   QUESTION_BANK,
   buildBlendedTest,
