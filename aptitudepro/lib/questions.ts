@@ -109,7 +109,6 @@ export function buildQuestionBank(): QuestionBank {
   };
 
   // ==================== NUMERICAL (40 questions) ====================
-  // — Data interpretation (10) —
   addQ('numerical',{difficulty:2,table:DI_T1,question:"What is the average amount of interest per year which the company had to pay during this period?",options:["Rs. 32.43 lakhs","Rs. 33.72 lakhs","Rs. 34.18 lakhs","Rs. 36.66 lakhs"],correct:3,explanation:"Average = (23.4+32.5+41.6+36.4+49.4)/5 = 183.3/5 = 36.66 lakhs"});
   addQ('numerical',{difficulty:3,table:DI_T1,question:"The total expenditure in 1998 was approximately what percent of the total expenditure in 2002?",options:["62%","66%","69%","71%"],correct:2,explanation:"1998 total ≈ 495.4; 2002 total ≈ 713.36; Ratio = 495.4/713.36 ≈ 69%"});
   addQ('numerical',{difficulty:3,table:DI_T2,question:"In which year was the percentage of qualified males to appeared males the highest?",options:["1997","1998","1999","2000"],correct:0,explanation:"1997: 1.5/2.9 ≈ 51.7% (highest)"});
@@ -120,8 +119,6 @@ export function buildQuestionBank(): QuestionBank {
   addQ('numerical',{difficulty:2,table:DI_BUD,question:"If education expenses increase by 25%, what is the new amount?",options:["Rs. 4,200","Rs. 4,400","Rs. 4,500","Rs. 4,800"],correct:2,explanation:"3,600 × 1.25 = 4,500"});
   addQ('numerical',{difficulty:3,table:DI_MOB,question:"What is the percentage growth in total sales from 2018 to 2022?",options:["48%","52%","54%","58%"],correct:2,explanation:"(162-105)/105 × 100 ≈ 54.3%"});
   addQ('numerical',{difficulty:4,table:DI_GDP,question:"Which sector showed the highest volatility (range) in growth rates?",options:["Agriculture","Manufacturing","Services","Overall"],correct:1,explanation:"Manufacturing range = 12.3-(-8.4) = 20.7 (highest)"});
-
-  // — Arithmetic & percentages (10) —
   addQ('numerical',{difficulty:2,question:"A train travels 360 km in 5 hours. What is its average speed?",options:["64 km/h","70 km/h","72 km/h","75 km/h"],correct:2,explanation:"360/5 = 72 km/h"});
   addQ('numerical',{difficulty:3,question:"If 15 men complete a job in 24 days, how many days will 18 men take?",options:["18 days","20 days","22 days","25 days"],correct:1,explanation:"15×24 = 360 man-days. 360/18 = 20 days"});
   addQ('numerical',{difficulty:3,question:"A shopkeeper marks goods 40% above cost price and gives a 15% discount. Profit percentage is:",options:["15%","19%","21%","25%"],correct:1,explanation:"SP = 1.40×CP×0.85 = 1.19×CP → 19% profit"});
@@ -132,8 +129,6 @@ export function buildQuestionBank(): QuestionBank {
   addQ('numerical',{difficulty:2,question:"Average of first 10 natural numbers is:",options:["4.5","5","5.5","6"],correct:2,explanation:"(1+2+...+10)/10 = 55/10 = 5.5"});
   addQ('numerical',{difficulty:3,question:"HCF of 36 and 48 is:",options:["6","8","12","18"],correct:2,explanation:"36=2²×3², 48=2⁴×3 → HCF=2²×3=12"});
   addQ('numerical',{difficulty:3,question:"LCM of 12, 18, and 24 is:",options:["48","60","72","84"],correct:2,explanation:"LCM(12,18,24) = 72"});
-
-  // — Probability (10) —
   addQ('numerical',{difficulty:2,table:DI_PROB,question:"A marble is drawn at random from the bag. What is the probability it is red?",options:["1/4","1/3","5/20","1/5"],correct:2,explanation:"Total = 5+7+3+5 = 20. P(red) = 5/20 = 1/4"});
   addQ('numerical',{difficulty:3,table:DI_PROB,question:"What is the probability of drawing a blue or green marble?",options:["7/20","1/2","10/20","3/10"],correct:1,explanation:"P(blue or green) = (7+3)/20 = 10/20 = 1/2"});
   addQ('numerical',{difficulty:3,question:"A fair coin is tossed 3 times. What is the probability of getting exactly 2 heads?",options:["1/4","3/8","1/2","5/8"],correct:1,explanation:"C(3,2)×(1/2)³ = 3/8"});
@@ -142,20 +137,18 @@ export function buildQuestionBank(): QuestionBank {
   addQ('numerical',{difficulty:2,question:"From a deck of 52 cards, P(drawing a king) is:",options:["1/13","1/4","1/52","4/52"],correct:0,explanation:"4 kings in 52 cards → P = 4/52 = 1/13"});
   addQ('numerical',{difficulty:4,question:"P(A) = 0.4, P(B) = 0.5, P(A∩B) = 0.2. P(A∪B) = ?",options:["0.6","0.7","0.8","0.9"],correct:1,explanation:"P(A∪B) = 0.4+0.5-0.2 = 0.7"});
   addQ('numerical',{difficulty:3,question:"In a class of 30, 18 like cricket, 15 like football, 10 like both. How many like neither?",options:["5","7","8","10"],correct:1,explanation:"Like at least one = 18+15-10 = 23. Neither = 30-23 = 7"});
-  addQ('numerical',{difficulty:4,question:"A number is chosen from 1–20. P(prime or even) is:",options:["3/4","4/5","13/20","7/10"],correct:2,explanation:"Primes: 2,3,5,7,11,13,17,19 (8). Evens: 2,4,6,8,10,12,14,16,18,20 (10). Overlap: 2. Union = 8+10-1 = 17. Wait, 2 is prime and even so overlap=1. P=17/20? Primes (8) + Evens (10) – both (1, only 2) = 17. Hmm re-check: primes ∩ even = {2}, count=1. So 8+10-1=17. But 17/20 ≠ 13/20. Correct: P = 17/20. Choose 17/20."});
-  addQ('numerical',{difficulty:3,question:"Three letters are randomly selected from {A,B,C,D,E} without repetition. How many ways?",options:["10","20","60","120"],correct:2,explanation:"P(5,3) = 5×4×3 = 60 ordered selections"});
-
-  // — Discounts & profit/loss (10) —
   addQ('numerical',{difficulty:2,question:"An article costs Rs. 500. It is sold at a 20% discount on the marked price of Rs. 700. Profit or loss?",options:["Profit Rs. 60","Loss Rs. 60","Profit Rs. 40","No profit no loss"],correct:0,explanation:"SP = 700×0.80 = 560. CP = 500. Profit = 60"});
   addQ('numerical',{difficulty:3,question:"A trader gives successive discounts of 20% and 10%. What is the effective discount?",options:["28%","29%","30%","32%"],correct:0,explanation:"Effective = 1-(0.8×0.9) = 1-0.72 = 28%"});
   addQ('numerical',{difficulty:3,question:"An item's price is reduced by 25% then increased by 25%. Net change?",options:["-6.25%","0%","+6.25%","-12.5%"],correct:0,explanation:"1×0.75×1.25 = 0.9375 → 6.25% net decrease"});
-  addQ('numerical',{difficulty:4,question:"A shopkeeper marks up 50% and offers 20% discount. He still makes a profit. Profit %?",options:["15%","20%","22%","25%"],correct:1,explanation:"SP = CP×1.5×0.8 = 1.2×CP → 20% profit"});
+  addQ('numerical',{difficulty:4,question:"A shopkeeper marks up 50% and offers 20% discount. Profit %?",options:["15%","20%","22%","25%"],correct:1,explanation:"SP = CP×1.5×0.8 = 1.2×CP → 20% profit"});
   addQ('numerical',{difficulty:2,question:"Cost price Rs. 400, selling price Rs. 480. Profit %?",options:["15%","18%","20%","25%"],correct:2,explanation:"Profit = 80. (80/400)×100 = 20%"});
   addQ('numerical',{difficulty:3,question:"A TV costing Rs. 12,000 is sold for Rs. 10,200. Loss %?",options:["10%","12%","15%","18%"],correct:2,explanation:"Loss = 1800. (1800/12000)×100 = 15%"});
   addQ('numerical',{difficulty:3,question:"By selling 12 pens for Rs. 120, a man gains 20%. Cost of 12 pens?",options:["Rs. 96","Rs. 100","Rs. 104","Rs. 108"],correct:1,explanation:"SP=120, profit=20% → CP = 120/1.2 = Rs. 100"});
-  addQ('numerical',{difficulty:4,question:"If a 10% discount makes a loss of 5%, the profit when sold at marked price is:",options:["5.56%","6.67%","10%","11.11%"],correct:0,explanation:"SP×0.9 = 0.95×CP → SP = (0.95/0.9)×CP. At MP: profit = (SP-CP)/CP = (0.95/0.9)-1 = 0.05/0.9 ≈ 5.56%"});
+  addQ('numerical',{difficulty:4,question:"If a 10% discount makes a loss of 5%, the profit when sold at marked price is:",options:["5.56%","6.67%","10%","11.11%"],correct:0,explanation:"SP×0.9 = 0.95×CP → SP = (0.95/0.9)×CP. At MP: profit ≈ 5.56%"});
   addQ('numerical',{difficulty:2,question:"A Rs. 2,000 item has GST of 18%. Final price?",options:["Rs. 2,180","Rs. 2,260","Rs. 2,360","Rs. 2,400"],correct:2,explanation:"2000×1.18 = Rs. 2,360"});
   addQ('numerical',{difficulty:3,question:"After two years of 10% annual depreciation, the value of a Rs. 50,000 asset is:",options:["Rs. 40,000","Rs. 40,500","Rs. 41,500","Rs. 42,500"],correct:1,explanation:"50000×0.9² = 50000×0.81 = Rs. 40,500"});
+  addQ('numerical',{difficulty:4,question:"Three letters are randomly selected from {A,B,C,D,E} without repetition. How many ways?",options:["10","20","60","120"],correct:2,explanation:"P(5,3) = 5×4×3 = 60 ordered selections"});
+  addQ('numerical',{difficulty:3,question:"A number is chosen from 1–20. P(prime or even) is:",options:["3/4","4/5","17/20","7/10"],correct:2,explanation:"Primes(8) + Evens(10) – overlap(2 only)=1 → 17. P=17/20"});
 
   // ==================== VERBAL (18 questions) ====================
   addQ('verbal',{difficulty:2,passage:CLOUD_P,question:"The primary advantage of cloud computing mentioned is:",options:["Enhanced security","Elastic scaling capability","Reduced environmental impact","GDPR compliance"],correct:1,explanation:"The passage states organisations can benefit from elastic scaling."});
@@ -247,7 +240,7 @@ export function buildQuestionBank(): QuestionBank {
   addQ('abstract',{difficulty:3,question:"What number replaces ?: 2, 6, 18, 54, ?",options:["108","162","216","270"],correct:1,explanation:"×3 each step: 54×3 = 162."});
   addQ('abstract',{difficulty:4,question:"If 🔴→🟡 and 🟡→🟢, then 🔴→?",options:["🔴","🟡","🟢","🔵"],correct:2,explanation:"Transitive chain: red→yellow→green."});
 
-  // ==================== SJT — 8 questions ====================
+  // ==================== SJT (8 questions) ====================
   addQ('sjt',{difficulty:2,question:"A team member consistently arrives late to meetings. You should first:",options:["Ignore it to avoid conflict","Speak privately to understand the issue","Report to manager immediately","Make sarcastic comments in meetings"],correct:1,explanation:"Address issues directly and privately before escalating."});
   addQ('sjt',{difficulty:3,question:"A client demands a feature that exceeds project scope. You:",options:["Agree to keep them happy","Refuse outright","Explain impact and negotiate alternatives","Do it without telling the team"],correct:2,explanation:"Professional negotiation balances client needs with team capacity."});
   addQ('sjt',{difficulty:2,question:"You discover a minor error in your work after submission. Best action:",options:["Hope no one notices","Immediately notify supervisor with correction","Correct it without mentioning","Wait to see if it's noticed"],correct:1,explanation:"Proactive disclosure with solution demonstrates integrity."});
@@ -257,7 +250,7 @@ export function buildQuestionBank(): QuestionBank {
   addQ('sjt',{difficulty:2,question:"Your team is divided on a technical approach. You should:",options:["Choose based on personal preference","Facilitate discussion of pros/cons","Flip a coin","Ask an external consultant immediately"],correct:1,explanation:"Facilitating structured evaluation empowers the team and leads to better decisions."});
   addQ('sjt',{difficulty:3,question:"A deadline is impossible to meet with current resources. You:",options:["Work overtime silently","Ask for a deadline extension immediately","Analyse options and present trade-offs to stakeholders","Cut corners on quality"],correct:2,explanation:"Transparent stakeholder communication with options is best practice."});
 
-  // ==================== WATSON-GLASER — 12 questions ====================
+  // ==================== WATSON-GLASER (12 questions) ====================
   addQ('watson',{passage:WG_P1,difficulty:2,question:"40% of managers report difficulty coordinating team activities.",options:["True","False","Cannot say"],correct:0,explanation:"Directly stated in the passage."});
   addQ('watson',{passage:WG_P1,difficulty:4,question:"Flexible working causes higher employee satisfaction.",options:["True","False","Cannot say"],correct:2,explanation:"Correlation is shown, but causation is not established."});
   addQ('watson',{passage:WG_P1,difficulty:3,question:"All Fortune 500 companies have above-average employee satisfaction.",options:["True","False","Cannot say"],correct:1,explanation:"Only 70% offer flexible working; the statement applies only to those companies."});
@@ -323,7 +316,6 @@ export function buildQuestionBank(): QuestionBank {
   addQ('critical',{difficulty:3,question:"Which strengthens an argument?",options:["Emotional language","Relevant evidence","Appeal to popularity","Personal attacks"],correct:1,explanation:"Relevant evidence and sound reasoning strengthen arguments; the others are fallacies."});
 
   // ==================== ELECTRICAL (35 questions) ====================
-  // — Circuit fundamentals (10) —
   addQ('electrical',{difficulty:2,diagram:circuitSVG('series'),question:"What is the total resistance in this series circuit?",options:["10Ω","30Ω","60Ω","100Ω"],correct:2,explanation:"Series: R_total = 10+20+30 = 60Ω."});
   addQ('electrical',{difficulty:3,diagram:circuitSVG('series'),question:"Using Ohm's Law, what is the current in this series circuit?",options:["0.1A","0.2A","0.3A","0.5A"],correct:1,explanation:"I = V/R = 12/60 = 0.2A."});
   addQ('electrical',{difficulty:2,diagram:circuitSVG('parallel'),question:"What is the total resistance in this parallel circuit?",options:["5Ω","6.67Ω","15Ω","30Ω"],correct:1,explanation:"1/R = 1/10 + 1/20 = 3/20 → R = 6.67Ω."});
@@ -334,98 +326,57 @@ export function buildQuestionBank(): QuestionBank {
   addQ('electrical',{difficulty:2,question:"What is the unit of electrical resistance?",options:["Volt","Ampere","Ohm","Watt"],correct:2,explanation:"Resistance is measured in Ohms (Ω)."});
   addQ('electrical',{difficulty:2,question:"What component stores electrical energy in an electric field?",options:["Resistor","Capacitor","Diode","Switch"],correct:1,explanation:"Capacitors store energy in an electric field between plates."});
   addQ('electrical',{difficulty:4,question:"Kirchhoff's Current Law states that:",options:["Current is constant in series","Sum of currents entering a junction equals sum leaving","Voltage drops equal source voltage","Resistance is proportional to length"],correct:1,explanation:"KCL: ΣI_in = ΣI_out at any junction (conservation of charge)."});
-
-  // — Power & electronics (5) —
   addQ('electrical',{difficulty:3,question:"Power in a circuit equals:",options:["V × I","V / I","I / V","R × I"],correct:0,explanation:"P = V × I (Watts = Volts × Amperes)."});
   addQ('electrical',{difficulty:3,question:"A 60W bulb connected to 120V draws how much current?",options:["0.25A","0.5A","1A","2A"],correct:1,explanation:"I = P/V = 60/120 = 0.5A."});
   addQ('electrical',{difficulty:4,question:"Three 30Ω resistors in parallel have total resistance of:",options:["10Ω","20Ω","30Ω","90Ω"],correct:0,explanation:"1/R = 3/30 = 1/10 → R = 10Ω."});
   addQ('electrical',{difficulty:3,question:"In an AC circuit with pure inductance, current ______ voltage by 90°.",options:["Leads","Lags","Is in phase with","Is opposite to"],correct:1,explanation:"Inductive reactance causes current to lag voltage by 90°."});
   addQ('electrical',{difficulty:2,question:"What is the frequency of standard UK mains electricity?",options:["50 Hz","60 Hz","100 Hz","120 Hz"],correct:0,explanation:"UK/Europe uses 50 Hz; the US uses 60 Hz."});
-
-  // — Logic & digital (5) —
   addQ('electrical',{difficulty:2,question:"An AND gate output is HIGH when:",options:["Any input is HIGH","All inputs are HIGH","No input is HIGH","Inputs are different"],correct:1,explanation:"AND gate: output HIGH only when ALL inputs are HIGH."});
   addQ('electrical',{difficulty:3,question:"Binary 1010 in decimal is:",options:["8","10","12","14"],correct:1,explanation:"1×8 + 0×4 + 1×2 + 0×1 = 10."});
   addQ('electrical',{difficulty:3,question:"Flip-flops are used as:",options:["Amplifiers","Memory elements","Oscillators","Rectifiers"],correct:1,explanation:"Flip-flops store one bit of data — used as memory elements."});
   addQ('electrical',{difficulty:2,question:"SCR stands for:",options:["Silicon Controlled Rectifier","Silicon Carbon Resistor","System Control Relay","Signal Conditioning Register"],correct:0,explanation:"SCR = Silicon Controlled Rectifier, a power semiconductor device."});
   addQ('electrical',{difficulty:3,question:"An OR gate output is LOW only when:",options:["Both inputs are HIGH","Both inputs are LOW","One input is HIGH","Inputs are different"],correct:1,explanation:"OR gate: output LOW only when ALL inputs are LOW."});
-
-  // — Hydroelectric power (5) —
   addQ('electrical',{difficulty:2,question:"In a hydroelectric power plant, which energy conversion occurs?",options:["Chemical → Electrical","Kinetic+Potential → Electrical","Thermal → Electrical","Nuclear → Electrical"],correct:1,explanation:"Water's potential and kinetic energy drives turbines to generate electricity."});
   addQ('electrical',{difficulty:3,question:"The efficiency of a hydroelectric turbine depends primarily on:",options:["Water temperature","Volume flow rate and head (height)","Rainfall frequency","Ambient air pressure"],correct:1,explanation:"Power output = ρgQH×efficiency. Flow rate (Q) and head (H) are key factors."});
   addQ('electrical',{difficulty:4,question:"A hydro plant has a head of 100 m and flow rate 50 m³/s. Approximate power output (assume 90% efficiency)?",options:["20 MW","30 MW","44 MW","55 MW"],correct:2,explanation:"P = ρgQH×η = 1000×9.81×50×100×0.9 ≈ 44.1 MW."});
   addQ('electrical',{difficulty:3,question:"Pumped-storage hydroelectricity is used to:",options:["Generate electricity continuously","Store energy by pumping water uphill during off-peak periods","Filter water for drinking","Cool thermal power plants"],correct:1,explanation:"Pumped-storage acts as a large battery — pumping water uphill when power is cheap, releasing it to generate when demand peaks."});
   addQ('electrical',{difficulty:2,question:"Which type of turbine is used for high-head, low-flow hydroelectric sites?",options:["Kaplan turbine","Francis turbine","Pelton turbine","Bulb turbine"],correct:2,explanation:"Pelton turbines are impulse turbines suited for very high heads (>300 m) and low flow."});
-
-  // — Thermal power (5) —
   addQ('electrical',{difficulty:2,question:"In a coal-fired thermal power plant, which component converts steam energy to mechanical energy?",options:["Boiler","Condenser","Steam turbine","Generator"],correct:2,explanation:"The steam turbine converts steam pressure/kinetic energy into shaft rotation."});
   addQ('electrical',{difficulty:3,question:"The Rankine cycle is the thermodynamic cycle used in:",options:["Gas turbines","Petrol engines","Steam power plants","Refrigerators"],correct:2,explanation:"The Rankine cycle (using water/steam) is the basis of steam power plant operation."});
   addQ('electrical',{difficulty:4,question:"A thermal power plant generates 500 MW from 1500 MW of heat input. Its thermal efficiency is:",options:["25%","33%","50%","67%"],correct:1,explanation:"η = W_out/Q_in = 500/1500 ≈ 33.3%."});
-  addQ('electrical',{difficulty:3,question:"In a combined cycle power plant, waste heat from the gas turbine is used to:",options:["Cool the condenser","Generate steam to drive a second turbine","Preheat the fuel","Power the cooling towers"],correct:1,explanation:"Combined cycle recovers exhaust heat in a heat recovery steam generator (HRSG) to drive a steam turbine, raising overall efficiency to ~55–60%."});
+  addQ('electrical',{difficulty:3,question:"In a combined cycle power plant, waste heat from the gas turbine is used to:",options:["Cool the condenser","Generate steam to drive a second turbine","Preheat the fuel","Power the cooling towers"],correct:1,explanation:"Combined cycle recovers exhaust heat in a HRSG to drive a steam turbine, raising overall efficiency to ~55–60%."});
   addQ('electrical',{difficulty:2,question:"Which gas is the primary greenhouse gas emission from thermal power plants burning fossil fuels?",options:["Nitrogen","CO₂","Oxygen","Argon"],correct:1,explanation:"Combustion of fossil fuels produces CO₂ as the primary greenhouse gas emission."});
-
-  // — Renewable energy (5) —
   addQ('electrical',{difficulty:2,question:"What device converts solar energy directly into electricity?",options:["Solar thermal collector","Photovoltaic cell","Wind turbine","Fuel cell"],correct:1,explanation:"Photovoltaic (PV) cells use the photoelectric effect to convert sunlight directly to DC electricity."});
   addQ('electrical',{difficulty:3,question:"The capacity factor of a wind turbine is typically:",options:["25–45%","70–85%","90–95%","10–15%"],correct:0,explanation:"Wind turbines typically achieve 25–45% capacity factor due to variable wind speeds."});
   addQ('electrical',{difficulty:4,question:"A 5 MW wind turbine operates at 35% capacity factor. Annual energy output?",options:["7.665 GWh","15.33 GWh","43.8 GWh","153.3 GWh"],correct:1,explanation:"Energy = 5 MW × 0.35 × 8,760 h = 15,330 MWh = 15.33 GWh."});
   addQ('electrical',{difficulty:3,question:"Which renewable energy source has the highest energy density?",options:["Wind","Solar PV","Geothermal","Tidal"],correct:2,explanation:"Geothermal energy taps Earth's internal heat — high availability and consistent output compared to intermittent sources."});
   addQ('electrical',{difficulty:2,question:"The inverter in a solar PV system converts:",options:["AC to DC","DC to AC","High voltage AC to low voltage AC","DC to higher DC voltage"],correct:1,explanation:"Inverters convert the DC output of solar panels to grid-compatible AC."});
-  // — Advanced circuit analysis (5) —
-addQ('electrical',{difficulty:5,question:"In a series RLC circuit at resonance, which statement is true?",options:["Impedance is minimum and purely resistive","Impedance is maximum","Current is zero","Power factor is zero"],correct:0,explanation:"At resonance, XL = XC, impedance Z = R (minimum), and power factor = 1."});
-addQ('electrical',{difficulty:5,question:"A circuit has impedance Z = 3 + j4 Ω. The power factor is:",options:["0.6 lagging","0.8 lagging","0.6 leading","0.8 leading"],correct:0,explanation:"|Z|=5, PF = R/Z = 3/5 = 0.6, inductive → lagging."});
+  addQ('electrical',{difficulty:5,question:"In a series RLC circuit at resonance, which statement is true?",options:["Impedance is minimum and purely resistive","Impedance is maximum","Current is zero","Power factor is zero"],correct:0,explanation:"At resonance, XL = XC, impedance Z = R (minimum), and power factor = 1."});
+  addQ('electrical',{difficulty:5,question:"A circuit has impedance Z = 3 + j4 Ω. The power factor is:",options:["0.6 lagging","0.8 lagging","0.6 leading","0.8 leading"],correct:0,explanation:"|Z|=5, PF = R/Z = 3/5 = 0.6, inductive → lagging."});
+  addQ('electrical',{difficulty:5,question:"Maximum power transfer occurs when load resistance equals:",options:["Source resistance","Twice source resistance","Half source resistance","Zero"],correct:0,explanation:"Maximum power transfer theorem: RL = Rth."});
+  addQ('electrical',{difficulty:5,question:"In nodal analysis, the number of independent equations equals:",options:["Number of branches","Number of nodes","Number of non-reference nodes","Number of loops"],correct:2,explanation:"Number of nodal equations = N - 1 (excluding reference node)."});
+  addQ('electrical',{difficulty:5,question:"Superposition theorem is applicable only to:",options:["Linear circuits","Nonlinear circuits","AC circuits only","DC circuits only"],correct:0,explanation:"Superposition works only in linear systems."});
+  addQ('electrical',{difficulty:5,question:"A system is stable if all poles of its transfer function are:",options:["On imaginary axis","In right half plane","In left half plane","At origin"],correct:2,explanation:"For stability, all poles must lie in the left half of s-plane."});
+  addQ('electrical',{difficulty:5,question:"The steady-state error of a Type-1 system for step input is:",options:["Infinity","Zero","Finite","Oscillatory"],correct:1,explanation:"Type-1 system has zero steady-state error for step input."});
+  addQ('electrical',{difficulty:5,question:"Gain margin is measured at the frequency where:",options:["Phase = -180°","Magnitude = 1","Phase = 0°","Magnitude = 0"],correct:0,explanation:"Gain margin is evaluated at phase crossover frequency (phase = -180°)."});
+  addQ('electrical',{difficulty:5,question:"Increasing damping ratio in a second-order system results in:",options:["More overshoot","Less overshoot","Higher oscillation","Instability"],correct:1,explanation:"Higher damping reduces oscillations and overshoot."});
+  addQ('electrical',{difficulty:5,question:"The root locus shows:",options:["Time response","Frequency response","Pole movement with gain","Phase margin"],correct:2,explanation:"Root locus plots system poles as gain varies."});
+  addQ('electrical',{difficulty:5,question:"Slip of an induction motor at synchronous speed is:",options:["1","0","0.5","-1"],correct:1,explanation:"Slip s = (Ns - N)/Ns. At Ns → s = 0."});
+  addQ('electrical',{difficulty:5,question:"Maximum torque in an induction motor occurs when:",options:["Rotor resistance = stator resistance","Rotor reactance = rotor resistance","Slip = 1","Rotor resistance = rotor reactance"],correct:3,explanation:"Condition for max torque: R2 = X2."});
+  addQ('electrical',{difficulty:5,question:"In a transformer, core losses depend mainly on:",options:["Load current","Voltage and frequency","Resistance","Temperature only"],correct:1,explanation:"Core losses (hysteresis + eddy) depend on voltage & frequency."});
+  addQ('electrical',{difficulty:5,question:"Back EMF in a DC motor is proportional to:",options:["Flux only","Speed only","Flux × speed","Armature current"],correct:2,explanation:"Eb = kΦω."});
+  addQ('electrical',{difficulty:5,question:"A synchronous motor operates at:",options:["Below synchronous speed","Above synchronous speed","Exactly synchronous speed","Variable speed"],correct:2,explanation:"Speed is locked to supply frequency."});
+  addQ('electrical',{difficulty:5,question:"Ferranti effect occurs in:",options:["Short lines","Medium lines","Long transmission lines","DC lines"],correct:2,explanation:"Ferranti effect is prominent in long AC transmission lines due to capacitance."});
+  addQ('electrical',{difficulty:5,question:"Per-unit system simplifies calculations by:",options:["Eliminating units","Normalizing values","Reducing voltage","Increasing current"],correct:1,explanation:"All quantities are expressed as fractions of base values."});
+  addQ('electrical',{difficulty:5,question:"Load flow analysis is used to determine:",options:["Fault currents","Voltage profile","Transient stability","Insulation failure"],correct:1,explanation:"Load flow gives bus voltages, power flows, etc."});
+  addQ('electrical',{difficulty:5,question:"Corona loss depends strongly on:",options:["Voltage","Frequency","Conductor diameter","All of the above"],correct:3,explanation:"Corona depends on voltage, air conditions, conductor size, etc."});
+  addQ('electrical',{difficulty:5,question:"Skin effect causes:",options:["Uniform current distribution","Higher resistance at DC","Current concentration near surface","Lower resistance"],correct:2,explanation:"AC current flows near conductor surface at high frequency."});
+  addQ('electrical',{difficulty:5,question:"A fully controlled rectifier uses:",options:["Diodes only","SCRs only","Transistors","Capacitors"],correct:1,explanation:"Fully controlled rectifiers use SCRs for phase control."});
+  addQ('electrical',{difficulty:5,question:"Firing angle in SCR controls:",options:["Voltage output","Frequency","Resistance","Inductance"],correct:0,explanation:"Adjusting firing angle controls average output voltage."});
+  addQ('electrical',{difficulty:5,question:"In a chopper circuit, duty cycle controls:",options:["Frequency","Output voltage","Current ripple","Switching loss"],correct:1,explanation:"Vout proportional to duty cycle."});
+  addQ('electrical',{difficulty:5,question:"An inverter converts:",options:["AC to DC","DC to AC","AC to AC","DC to DC"],correct:1,explanation:"Inverters convert DC into AC power."});
+  addQ('electrical',{difficulty:5,question:"PWM technique is used to:",options:["Reduce voltage only","Control power efficiently","Increase resistance","Eliminate harmonics completely"],correct:1,explanation:"PWM improves efficiency and controls output."});
 
-addQ('electrical',{difficulty:5,question:"Maximum power transfer occurs when load resistance equals:",options:["Source resistance","Twice source resistance","Half source resistance","Zero"],correct:0,explanation:"Maximum power transfer theorem: RL = Rth."});
-
-addQ('electrical',{difficulty:5,question:"In nodal analysis, the number of independent equations equals:",options:["Number of branches","Number of nodes","Number of non-reference nodes","Number of loops"],correct:2,explanation:"Number of nodal equations = N - 1 (excluding reference node)."});
-
-addQ('electrical',{difficulty:5,question:"Superposition theorem is applicable only to:",options:["Linear circuits","Nonlinear circuits","AC circuits only","DC circuits only"],correct:0,explanation:"Superposition works only in linear systems."});
-
-
-// — Control systems (5) —
-addQ('electrical',{difficulty:5,question:"A system is stable if all poles of its transfer function are:",options:["On imaginary axis","In right half plane","In left half plane","At origin"],correct:2,explanation:"For stability, all poles must lie in the left half of s-plane."});
-
-addQ('electrical',{difficulty:5,question:"The steady-state error of a Type-1 system for step input is:",options:["Infinity","Zero","Finite","Oscillatory"],correct:1,explanation:"Type-1 system has zero steady-state error for step input."});
-
-addQ('electrical',{difficulty:5,question:"Gain margin is measured at the frequency where:",options:["Phase = -180°","Magnitude = 1","Phase = 0°","Magnitude = 0"],correct:0,explanation:"Gain margin is evaluated at phase crossover frequency (phase = -180°)."});
-
-addQ('electrical',{difficulty:5,question:"Increasing damping ratio in a second-order system results in:",options:["More overshoot","Less overshoot","Higher oscillation","Instability"],correct:1,explanation:"Higher damping reduces oscillations and overshoot."});
-
-addQ('electrical',{difficulty:5,question:"The root locus shows:",options:["Time response","Frequency response","Pole movement with gain","Phase margin"],correct:2,explanation:"Root locus plots system poles as gain varies."});
-
-
-// — Electrical machines (5) —
-addQ('electrical',{difficulty:5,question:"Slip of an induction motor at synchronous speed is:",options:["1","0","0.5","-1"],correct:1,explanation:"Slip s = (Ns - N)/Ns. At Ns → s = 0."});
-
-addQ('electrical',{difficulty:5,question:"Maximum torque in an induction motor occurs when:",options:["Rotor resistance = stator resistance","Rotor reactance = rotor resistance","Slip = 1","Rotor resistance = rotor reactance"],correct:3,explanation:"Condition for max torque: R2 = X2."});
-
-addQ('electrical',{difficulty:5,question:"In a transformer, core losses depend mainly on:",options:["Load current","Voltage and frequency","Resistance","Temperature only"],correct:1,explanation:"Core losses (hysteresis + eddy) depend on voltage & frequency."});
-
-addQ('electrical',{difficulty:5,question:"Back EMF in a DC motor is proportional to:",options:["Flux only","Speed only","Flux × speed","Armature current"],correct:2,explanation:"Eb = kΦω."});
-
-addQ('electrical',{difficulty:5,question:"A synchronous motor operates at:",options:["Below synchronous speed","Above synchronous speed","Exactly synchronous speed","Variable speed"],correct:2,explanation:"Speed is locked to supply frequency."});
-
-
-// — Power systems (5) —
-addQ('electrical',{difficulty:5,question:"Ferranti effect occurs in:",options:["Short lines","Medium lines","Long transmission lines","DC lines"],correct:2,explanation:"Ferranti effect is prominent in long AC transmission lines due to capacitance."});
-
-addQ('electrical',{difficulty:5,question:"Per-unit system simplifies calculations by:",options:["Eliminating units","Normalizing values","Reducing voltage","Increasing current"],correct:1,explanation:"All quantities are expressed as fractions of base values."});
-
-addQ('electrical',{difficulty:5,question:"Load flow analysis is used to determine:",options:["Fault currents","Voltage profile","Transient stability","Insulation failure"],correct:1,explanation:"Load flow gives bus voltages, power flows, etc."});
-
-addQ('electrical',{difficulty:5,question:"Corona loss depends strongly on:",options:["Voltage","Frequency","Conductor diameter","All of the above"],correct:3,explanation:"Corona depends on voltage, air conditions, conductor size, etc."});
-
-addQ('electrical',{difficulty:5,question:"Skin effect causes:",options:["Uniform current distribution","Higher resistance at DC","Current concentration near surface","Lower resistance"],correct:2,explanation:"AC current flows near conductor surface at high frequency."});
-
-
-// — Power electronics (5) —
-addQ('electrical',{difficulty:5,question:"A fully controlled rectifier uses:",options:["Diodes only","SCRs only","Transistors","Capacitors"],correct:1,explanation:"Fully controlled rectifiers use SCRs for phase control."});
-
-addQ('electrical',{difficulty:5,question:"Firing angle in SCR controls:",options:["Voltage output","Frequency","Resistance","Inductance"],correct:0,explanation:"Adjusting firing angle controls average output voltage."});
-
-addQ('electrical',{difficulty:5,question:"In a chopper circuit, duty cycle controls:",options:["Frequency","Output voltage","Current ripple","Switching loss"],correct:1,explanation:"Vout proportional to duty cycle."});
-
-addQ('electrical',{difficulty:5,question:"An inverter converts:",options:["AC to DC","DC to AC","AC to AC","DC to DC"],correct:1,explanation:"Inverters convert DC into AC power."});
-
-addQ('electrical',{difficulty:5,question:"PWM technique is used to:",options:["Reduce voltage only","Control power efficiently","Increase resistance","Eliminate harmonics completely"],correct:1,explanation:"PWM improves efficiency and controls output."});
   return bank;
 }
 
@@ -449,81 +400,97 @@ export const CATEGORIES: Record<string,{name:string;icon:string;description:stri
 export function getAllQuestions(): Question[] { return Object.values(QUESTION_BANK).flat(); }
 export function getTotalQuestionCount(): number { return getAllQuestions().length; }
 
-export function weightedSample(questions: Question[], n: number, excludeIds: string[] = []): Question[] {
-  const available = questions.filter(q => !excludeIds.includes(q.id));
-  if (available.length === 0) return [];
-  const result: Question[] = [];
-  const used = new Set<string>();
-  const totalWeight = available.reduce((a, b) => a + b.weight, 0);
-  for (let i = 0; i < Math.min(n, available.length); i++) {
-    let random = Math.random() * totalWeight;
-    for (const q of available) {
-      if (used.has(q.id)) continue;
-      random -= q.weight;
-      if (random <= 0) { result.push(q); used.add(q.id); break; }
-    }
+// ─── Fisher-Yates shuffle ────────────────────────────────────────────────────
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
   }
-  return result;
+  return a;
 }
 
-export function buildBlendedTest(category: string, count: number, excludeIds: string[] = []): Question[] {
-  const questions = QUESTION_BANK[category] || [];
-  if (questions.length === 0) return [];
-  
-  // Filter out recently asked questions
-  const available = questions.filter(q => !excludeIds.includes(q.id));
-  const pool = available.length > 0 ? available : questions;
-  
-  // Adaptive scoring: prioritize questions with low accuracy and low frequency
-  const scored = pool.map(q => {
-    const accuracy = q.timesAsked > 0 ? q.timesCorrect / q.timesAsked : 0;
-    const frequencyPenalty = Math.min(q.timesAsked / 10, 1); // Max penalty after 10 attempts
-    const recencyPenalty = excludeIds.includes(q.id) ? 0.3 : 1;
-    
-    // Lower score = higher priority (needs more practice)
-    const score = (accuracy * 0.4) + (frequencyPenalty * 0.3) - (q.weight * 0.3);
-    return { question: q, score: score * recencyPenalty };
+// ─── Core export: replaces buildBlendedTest ──────────────────────────────────
+/**
+ * Builds a 10-question test for the given category with:
+ *  1. True randomness — Fisher-Yates on every call
+ *  2. Exclusion of recently seen questions (uses persisted IDs from storage)
+ *  3. Adaptive weighting — questions answered wrong more recently score higher
+ *  4. Difficulty ramp — ~3 easy (1-2), ~4 medium (3), ~3 hard (4-5) ordered ascending
+ *
+ * @param category   Category key e.g. 'numerical'
+ * @param count      Number of questions (default 10)
+ * @param excludeIds Question IDs to exclude (recently seen for this category)
+ * @param statsMap   Per-question stats from localStorage { [id]: { timesAsked, timesCorrect } }
+ */
+export function buildBlendedTest(
+  category: string,
+  count: number = 10,
+  excludeIds: string[] = [],
+  statsMap: Record<string, { timesAsked: number; timesCorrect: number }> = {}
+): Question[] {
+  const pool = QUESTION_BANK[category] ?? [];
+  if (pool.length === 0) return [];
+
+  // Step 1: exclude recently seen; fall back to full pool if too many excluded
+  let available = pool.filter(q => !excludeIds.includes(q.id));
+  if (available.length < count) available = pool; // not enough fresh questions
+
+  // Step 2: assign an adaptive priority score to each question
+  // Higher score = more likely to be selected
+  const scored = available.map(q => {
+    const stats = statsMap[q.id];
+    let score = 1.0;
+    if (stats && stats.timesAsked > 0) {
+      const accuracy = stats.timesCorrect / stats.timesAsked;
+      // Penalise questions answered correctly at high rate; boost weak ones
+      score = 1.5 - accuracy;
+      // Small boost for rarely-seen questions (max 0.3 bonus)
+      const rarityBonus = Math.max(0, 0.3 - stats.timesAsked * 0.03);
+      score += rarityBonus;
+    }
+    // Add random jitter so equal-score questions don't always follow same order
+    score += Math.random() * 0.4;
+    return { q, score };
   });
-  
-  // Sort by score (ascending) and take top questions
-  scored.sort((a, b) => a.score - b.score);
-  const selected = scored.slice(0, Math.min(count, scored.length)).map(s => s.question);
-  
-  // Shuffle to prevent exact repetition order
-  for (let i = selected.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [selected[i], selected[j]] = [selected[j], selected[i]];
+
+  // Step 3: separate into difficulty tiers and pick quota from each
+  const easy   = shuffle(scored.filter(s => s.q.difficulty <= 2).sort((a,b) => b.score - a.score).slice(0, 8)).slice(0, 3);
+  const medium = shuffle(scored.filter(s => s.q.difficulty === 3).sort((a,b) => b.score - a.score).slice(0, 10)).slice(0, 4);
+  const hard   = shuffle(scored.filter(s => s.q.difficulty >= 4).sort((a,b) => b.score - a.score).slice(0, 8)).slice(0, 3);
+
+  // Step 4: fill any gaps caused by thin tiers
+  const chosen = new Set([...easy, ...medium, ...hard].map(s => s.q.id));
+  const remainder = count - chosen.size;
+  const filler: typeof easy = [];
+  if (remainder > 0) {
+    const extras = shuffle(scored.filter(s => !chosen.has(s.q.id))).slice(0, remainder);
+    filler.push(...extras);
   }
-  
-  return selected;
+
+  // Step 5: merge in difficulty order (easy → medium → hard → filler)
+  const ordered = [
+    ...easy.map(s => s.q),
+    ...medium.map(s => s.q),
+    ...hard.map(s => s.q),
+    ...filler.map(s => s.q),
+  ];
+
+  return ordered;
+}
+
+// Kept for backward-compat — no longer primary selection logic
+export function weightedSample(questions: Question[], n: number, excludeIds: string[] = []): Question[] {
+  const available = shuffle(questions.filter(q => !excludeIds.includes(q.id)));
+  return available.slice(0, n);
 }
 
 export function updateWeights(results: {questionId: string; correct: boolean}[]): void {
-  const all = getAllQuestions();
-  results.forEach(({questionId, correct}) => {
-    const q = all.find(q => q.id === questionId);
-    if (q) {
-      q.timesAsked++;
-      if (correct) q.timesCorrect++;
-      
-      // Adaptive weight calculation
-      const accuracy = q.timesCorrect / q.timesAsked;
-      const frequencyPenalty = Math.min(q.timesAsked / 10, 1);
-      
-      // Weight formula: prioritize questions that are:
-      // 1. Answered incorrectly (low accuracy)
-      // 2. Asked less frequently
-      q.weight = (1.5 - accuracy) * (1 - frequencyPenalty * 0.3) + 0.5;
-      
-      // Ensure minimum weight so questions don't disappear
-      if (q.weight < 0.3) q.weight = 0.3;
-    }
-  });
+  // no-op: weights are now managed entirely via localStorage stats in storage.ts
 }
+
 export function getLeastAskedQuestions(category: string, count: number): string[] {
-  const questions = QUESTION_BANK[category] || [];
-  return questions
-    .map(q => ({ id: q.id, timesAsked: q.timesAsked }))
+  return (QUESTION_BANK[category] ?? [])
     .sort((a, b) => a.timesAsked - b.timesAsked)
     .slice(0, count)
     .map(q => q.id);
