@@ -13,8 +13,8 @@ export interface QuestionStats {
   timesAsked: number;
   timesCorrect: number;
   weight: number;
-  lastAsked: number;   // unix ms timestamp — 0 if never asked
-  category: string;    // FIX: store category so we can filter by it
+  lastAsked: number;
+  category: string;
 }
 
 export interface AppData {
@@ -69,22 +69,29 @@ export function addTestResult(result: TestResult): void {
 
   const lastVisit = new Date(data.lastVisit);
   const today = new Date();
-  const diffDays = Math.floor((today.getTime() - lastVisit.getTime()) / (1000 * 60 * 60 * 24));
+  const diffDays = Math.floor(
+    (today.getTime() - lastVisit.getTime()) / (1000 * 60 * 60 * 24)
+  );
   if (diffDays === 1) data.streakDays++;
   else if (diffDays > 1) data.streakDays = 1;
 
   saveData(data);
 }
 
-/**
- * Called after each answer — persists per-question stats to localStorage.
- * category is now stored alongside each stat entry so exclusion can be scoped.
- */
-export function updateQuestionStats(questionId: string, correct: boolean, category: string = ''): void {
+export function updateQuestionStats(
+  questionId: string,
+  correct: boolean,
+  category: string = ''
+): void {
   const data = loadData();
+
   if (!data.questionStats[questionId]) {
     data.questionStats[questionId] = {
-      timesAsked: 0, timesCorrect: 0, weight: 1.0, lastAsked: 0, category,
+      timesAsked: 0,
+      timesCorrect: 0,
+      weight: 1.0,
+      lastAsked: 0,
+      category,
     };
   }
 
@@ -92,22 +99,23 @@ export function updateQuestionStats(questionId: string, correct: boolean, catego
   stats.timesAsked++;
   stats.timesCorrect = (stats.timesCorrect || 0) + (correct ? 1 : 0);
   stats.lastAsked = Date.now();
-  if (!stats.category) stats.category = category; // backfill for old records
+  if (!stats.category) stats.category = category;
 
   const accuracy = stats.timesCorrect / stats.timesAsked;
-  stats.weight = Math.max(0.3, (1.5 - accuracy) * (1 - Math.min(stats.timesAsked / 10, 1) * 0.3) + 0.5);
+  const frequencyFactor = Math.min(stats.timesAsked / 10, 1);
+  stats.weight = Math.max(
+    0.3,
+    (1.5 - accuracy) * (1 - frequencyFactor * 0.3) + 0.5
+  );
 
   saveData(data);
 }
 
-/**
- * Returns the IDs of the most recently asked questions FOR THIS CATEGORY ONLY.
- * This was the core bug — the old version ignored the category parameter entirely.
- *
- * @param category  Category key e.g. 'numerical'
- * @param limit     How many recent IDs to exclude (default 40 — covers ~4 full tests)
- */
-export function getRecentlyAskedQuestions(category: string, limit: number = 40): string[] {
+// Returns recently asked question IDs for THIS category only
+export function getRecentlyAskedQuestions(
+  category: string,
+  limit: number = 40
+): string[] {
   const data = loadData();
   return Object.entries(data.questionStats)
     .filter(([_, s]) => s.category === category && s.lastAsked > 0)
@@ -116,10 +124,7 @@ export function getRecentlyAskedQuestions(category: string, limit: number = 40):
     .map(([id]) => id);
 }
 
-/**
- * Returns the full stats map for a category — passed into buildBlendedTest
- * so adaptive scoring can use real persisted data (not just in-memory).
- */
+// Returns persisted stats map for a category — fed into buildBlendedTest
 export function getCategoryStatsMap(
   category: string
 ): Record<string, { timesAsked: number; timesCorrect: number }> {
@@ -127,13 +132,19 @@ export function getCategoryStatsMap(
   const result: Record<string, { timesAsked: number; timesCorrect: number }> = {};
   for (const [id, s] of Object.entries(data.questionStats)) {
     if (s.category === category) {
-      result[id] = { timesAsked: s.timesAsked, timesCorrect: s.timesCorrect };
+      result[id] = {
+        timesAsked: s.timesAsked,
+        timesCorrect: s.timesCorrect,
+      };
     }
   }
   return result;
 }
 
-export function getLeastAskedQuestions(category: string, count: number): string[] {
+export function getLeastAskedQuestions(
+  category: string,
+  count: number
+): string[] {
   const data = loadData();
   return Object.entries(data.questionStats)
     .filter(([_, s]) => s.category === category)
@@ -155,31 +166,44 @@ export function getAnalytics(): {
 
   if (results.length === 0) {
     return {
-      totalTests: 0, averageScore: 0, bestCategory: 'N/A',
-      streakDays: data.streakDays, recentResults: [], categoryPerformance: {},
+      totalTests: 0,
+      averageScore: 0,
+      bestCategory: 'N/A',
+      streakDays: data.streakDays,
+      recentResults: [],
+      categoryPerformance: {},
     };
   }
 
   const totalTests = results.length;
-  const averageScore = results.reduce((acc, r) => acc + r.percentage, 0) / totalTests;
+  const averageScore =
+    results.reduce((acc, r) => acc + r.percentage, 0) / totalTests;
 
   const categoryStats: Record<string, { total: number; count: number }> = {};
   results.forEach(r => {
-    if (!categoryStats[r.category]) categoryStats[r.category] = { total: 0, count: 0 };
+    if (!categoryStats[r.category])
+      categoryStats[r.category] = { total: 0, count: 0 };
     categoryStats[r.category].total += r.percentage;
     categoryStats[r.category].count++;
   });
 
   const categoryPerformance: Record<string, { avg: number; count: number }> = {};
   Object.entries(categoryStats).forEach(([cat, stats]) => {
-    categoryPerformance[cat] = { avg: stats.total / stats.count, count: stats.count };
+    categoryPerformance[cat] = {
+      avg: stats.total / stats.count,
+      count: stats.count,
+    };
   });
 
-  const bestCategory = Object.entries(categoryPerformance)
-    .sort((a, b) => b[1].avg - a[1].avg)[0]?.[0] || 'N/A';
+  const bestCategory =
+    Object.entries(categoryPerformance).sort(
+      (a, b) => b[1].avg - a[1].avg
+    )[0]?.[0] || 'N/A';
 
   return {
-    totalTests, averageScore, bestCategory,
+    totalTests,
+    averageScore,
+    bestCategory,
     streakDays: data.streakDays,
     recentResults: results.slice(-10).reverse(),
     categoryPerformance,
