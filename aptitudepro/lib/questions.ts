@@ -1,4 +1,4 @@
-port interface Question {
+import interface Question {
   id: string;
   category: string;
   type: 'numerical' | 'verbal' | 'logical' | 'mechanical' | 'spatial' | 'abstract' | 'sjt' | 'watson' | 'iq' | 'error' | 'critical' | 'electrical';
