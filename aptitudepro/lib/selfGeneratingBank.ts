@@ -1,5 +1,5 @@
 // selfGeneratingBank.ts
-// Drop this file next to question.ts — no other changes needed.
+// Drop this file next to questions.ts — no other changes needed.
 
 import {
   Question,
@@ -7,6 +7,20 @@ import {
   QUESTION_BANK,
   buildBlendedTest,
 } from './questions';
+
+// ── SSR-safe localStorage helpers ─────────────────────────────────────────────
+// Next.js renders on the server where `window` / `localStorage` do not exist.
+// Always guard every read/write with this helper.
+
+function safeGetItem(key: string): string | null {
+  if (typeof window === 'undefined') return null;
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+
+function safeSetItem(key: string, value: string): void {
+  if (typeof window === 'undefined') return;
+  try { localStorage.setItem(key, value); } catch { /* quota exceeded or private mode */ }
+}
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -466,14 +480,15 @@ class CrowdBank {
   constructor() { this.load(); }
 
   private load() {
-    try {
-      const s = localStorage.getItem(this.KEY);
-      if (s) this.pending = JSON.parse(s);
-    } catch { /* ignore */ }
+    // FIX: SSR-safe localStorage access
+    const s = safeGetItem(this.KEY);
+    if (s) {
+      try { this.pending = JSON.parse(s); } catch { this.pending = []; }
+    }
   }
 
   private save() {
-    try { localStorage.setItem(this.KEY, JSON.stringify(this.pending)); } catch { /* ignore */ }
+    safeSetItem(this.KEY, JSON.stringify(this.pending));
   }
 
   submit(q: Omit<Question, 'id' | 'timesAsked' | 'timesCorrect' | 'weight'>, userId: string): string {
@@ -534,14 +549,15 @@ export class SelfGeneratingBank {
   // ── Stats persistence ──────────────────────────────────────────────────
 
   private loadStats() {
-    try {
-      const s = localStorage.getItem(this.STATS_KEY);
-      if (s) this.stats = JSON.parse(s);
-    } catch { /* ignore */ }
+    // FIX: SSR-safe localStorage access
+    const s = safeGetItem(this.STATS_KEY);
+    if (s) {
+      try { this.stats = JSON.parse(s); } catch { this.stats = {}; }
+    }
   }
 
   private saveStats() {
-    try { localStorage.setItem(this.STATS_KEY, JSON.stringify(this.stats)); } catch { /* ignore */ }
+    safeSetItem(this.STATS_KEY, JSON.stringify(this.stats));
   }
 
   // ── Public API ─────────────────────────────────────────────────────────
@@ -550,18 +566,19 @@ export class SelfGeneratingBank {
    * Records a user's answer. Call this after every answered question.
    * @param questionId  The question's id field
    * @param correct     Whether the user answered correctly
+   * @param category    The question's category (required for stats initialisation)
    * @param responseMs  Optional response time in milliseconds
    */
   recordAnswer(questionId: string, correct: boolean, category: string, responseMs?: number): void {
-  if (!this.stats[questionId]) {
-    this.stats[questionId] = {
-      timesAsked: 0,
-      timesCorrect: 0,
-      lastSeen: Date.now(),
-      difficultyRating: 3,
-      category: category, // ✅ FIXED
-    };
-  }
+    if (!this.stats[questionId]) {
+      this.stats[questionId] = {
+        timesAsked: 0,
+        timesCorrect: 0,
+        lastSeen: Date.now(),
+        difficultyRating: 3,
+        category,
+      };
+    }
     const s = this.stats[questionId];
     s.timesAsked++;
     if (correct) s.timesCorrect++;
@@ -575,34 +592,36 @@ export class SelfGeneratingBank {
 
   /**
    * Builds a blended test, mixing the static bank, generated, and crowd questions.
-   * Delegates base selection to the existing buildBlendedTest() from question.ts.
+   * Delegates base selection to buildBlendedTest() from questions.ts.
    *
    * @param category   Category key e.g. 'numerical'
    * @param count      Total questions wanted (default 10)
    * @param excludeIds Question IDs to exclude
    */
   getQuestions(category: string, count = 10, excludeIds: string[] = []): Question[] {
-    // 60 % from the static bank (adaptive via buildBlendedTest)
-    const baseCount = Math.round(count * 0.6);
     const statsForBank: Record<string, { timesAsked: number; timesCorrect: number }> = {};
     for (const [id, s] of Object.entries(this.stats)) {
       statsForBank[id] = { timesAsked: s.timesAsked, timesCorrect: s.timesCorrect };
     }
+
+    // 60% from the static bank (adaptive via buildBlendedTest)
+    const baseCount = Math.round(count * 0.6);
     const base = buildBlendedTest(category, baseCount, excludeIds, statsForBank);
 
-    // 30 % generated from templates
+    // 30% generated from templates
     const genCount = Math.round(count * 0.3);
     const generated = this.templates.generateQuestions(category, genCount);
 
-    // 10 % crowd (pending with 3+ votes)
-    const crowdCount = count - base.length - generated.length;
-    const crowd = this.crowd.getPending()
-      .filter(p => p.status === 'pending' && p.category === category && p.votes >= 3)
-      .slice(0, Math.max(0, crowdCount)) as Question[];
+    // Remainder from crowd (pending with 3+ votes) — typically 1 slot for count=10
+    const crowdTarget = count - base.length - generated.length;
+    const crowd: Question[] = crowdTarget > 0
+      ? (this.crowd.getPending()
+          .filter(p => p.status === 'pending' && p.category === category && p.votes >= 3)
+          .slice(0, crowdTarget) as Question[])
+      : [];
 
+    // Fisher-Yates merge shuffle
     const merged = [...base, ...generated, ...crowd];
-
-    // Fisher-Yates shuffle
     for (let i = merged.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [merged[i], merged[j]] = [merged[j], merged[i]];
@@ -613,7 +632,8 @@ export class SelfGeneratingBank {
 
   /**
    * Scans all performance stats and evolves questions that have been seen 20+ times.
-   * Returns the list of newly evolved question variants.
+   * Returns newly evolved question variants.
+   * NOTE: Only static bank questions can be evolved (generated Qs have ephemeral IDs).
    */
   evolveAndImprove(): EvolvedQuestion[] {
     const evolved: EvolvedQuestion[] = [];
@@ -630,9 +650,7 @@ export class SelfGeneratingBank {
     return evolved;
   }
 
-  /**
-   * Submit a user-contributed question for community review.
-   */
+  /** Submit a user-contributed question for community review. */
   submitQuestion(
     q: Omit<Question, 'id' | 'timesAsked' | 'timesCorrect' | 'weight'>,
     userId: string
@@ -653,7 +671,6 @@ export class SelfGeneratingBank {
   }
 
   getCrowdStats() { return this.crowd.getStats(); }
-
   getPerformanceStats(): PerformanceStats { return { ...this.stats }; }
 
   getCategoryInsights(category: string) {
@@ -675,7 +692,7 @@ export class SelfGeneratingBank {
     return {
       accuracy: totalAttempts > 0 ? totalCorrect / totalAttempts : 0,
       totalAttempts,
-      weakTopics:  perf.slice(0, 3).map(p => p.id),
+      weakTopics:   perf.slice(0, 3).map(p => p.id),
       strongTopics: perf.slice(-3).map(p => p.id),
     };
   }
@@ -684,47 +701,8 @@ export class SelfGeneratingBank {
 }
 
 // ── Singleton factory ─────────────────────────────────────────────────────────
-
+// Returns a new instance each call — use useMemo/useRef in React to avoid
+// re-creating on every render (see AptitudeApp.tsx).
 export function createSelfGeneratingBank(): SelfGeneratingBank {
   return new SelfGeneratingBank();
 }
-
-/*
-── Usage example ────────────────────────────────────────────────────────────────
-
-import { createSelfGeneratingBank } from './selfGeneratingBank';
-
-const bank = createSelfGeneratingBank();
-
-// Get 10 questions for a category
-const questions = bank.getQuestions('numerical', 10);
-
-// After the user answers each question
-bank.recordAnswer(questions[0].id, true,  4200);  // correct, 4.2 s
-bank.recordAnswer(questions[1].id, false, 8000);  // wrong, 8 s
-
-// Evolve questions based on accumulated performance
-const evolved = bank.evolveAndImprove();
-console.log(`${evolved.length} questions evolved`);
-
-// User-submitted question
-const pendingId = bank.submitQuestion({
-  category: 'numerical', type: 'numerical', difficulty: 3,
-  question: 'A car travels 120 km in 2 hours. What is its speed?',
-  options: ['40 km/h', '50 km/h', '60 km/h', '70 km/h'],
-  correct: 2,
-  explanation: 'Speed = Distance/Time = 120/2 = 60 km/h',
-  table: '', diagram: '', passage: '',
-}, 'user_123');
-
-bank.voteQuestion(pendingId, true); // upvote
-
-// Category performance
-const insights = bank.getCategoryInsights('numerical');
-console.log(`Accuracy: ${(insights.accuracy * 100).toFixed(1)}%`);
-
-// Crowd stats
-const crowd = bank.getCrowdStats();
-console.log(`Pending: ${crowd.pending}, avg votes: ${crowd.avgVotes.toFixed(1)}`);
-
-*/
