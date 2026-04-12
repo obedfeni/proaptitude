@@ -552,13 +552,16 @@ export class SelfGeneratingBank {
    * @param correct     Whether the user answered correctly
    * @param responseMs  Optional response time in milliseconds
    */
-  recordAnswer(questionId: string, correct: boolean, responseMs?: number): void {
-    if (!this.stats[questionId]) {
-      this.stats[questionId] = {
-        timesAsked: 0, timesCorrect: 0,
-        lastSeen: Date.now(), difficultyRating: 3, category: '',
-      };
-    }
+  recordAnswer(questionId: string, correct: boolean, category: string, responseMs?: number): void {
+  if (!this.stats[questionId]) {
+    this.stats[questionId] = {
+      timesAsked: 0,
+      timesCorrect: 0,
+      lastSeen: Date.now(),
+      difficultyRating: 3,
+      category: category, // ✅ FIXED
+    };
+  }
     const s = this.stats[questionId];
     s.timesAsked++;
     if (correct) s.timesCorrect++;
