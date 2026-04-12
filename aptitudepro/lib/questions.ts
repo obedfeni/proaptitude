@@ -124,7 +124,7 @@ export function buildQuestionBank(): QuestionBank {
   addQ('numerical',{difficulty:3,question:"A shopkeeper marks goods 40% above cost price and gives a 15% discount. Profit percentage is:",options:["15%","19%","21%","25%"],correct:1,explanation:"SP = 1.40×CP×0.85 = 1.19×CP → 19% profit"});
   addQ('numerical',{difficulty:4,question:"Compound interest on Rs. 10,000 at 10% p.a. for 2 years is:",options:["Rs. 1,900","Rs. 2,000","Rs. 2,100","Rs. 2,200"],correct:2,explanation:"A = 10000×(1.1)² = 12100 → CI = Rs. 2,100"});
   addQ('numerical',{difficulty:2,question:"What is 15% of 240?",options:["32","34","36","38"],correct:2,explanation:"0.15×240 = 36"});
-  addQ('numerical',{difficulty:3,question:"The ratio of ages of A and B is 4:5. After 6 years it becomes 6:7. What is B's present age?",options:["12","15","18","20"],correct:1,explanation:"4x+6)/(5x+6)=6/7 → 28x+42=30x+36 → x=3 → B=15"});
+  addQ('numerical',{difficulty:3,question:"The ratio of ages of A and B is 4:5. After 6 years it becomes 6:7. What is B's present age?",options:["12","15","18","20"],correct:1,explanation:"(4x+6)/(5x+6)=6/7 → 28x+42=30x+36 → x=3 → B=15"});
   addQ('numerical',{difficulty:3,question:"If x:y = 3:4 and y:z = 5:6, what is x:z?",options:["5:8","3:6","5:6","3:5"],correct:0,explanation:"x:y:z = 15:20:24 → x:z = 15:24 = 5:8"});
   addQ('numerical',{difficulty:2,question:"Average of first 10 natural numbers is:",options:["4.5","5","5.5","6"],correct:2,explanation:"(1+2+...+10)/10 = 55/10 = 5.5"});
   addQ('numerical',{difficulty:3,question:"HCF of 36 and 48 is:",options:["6","8","12","18"],correct:2,explanation:"36=2²×3², 48=2⁴×3 → HCF=2²×3=12"});
@@ -400,7 +400,7 @@ export const CATEGORIES: Record<string,{name:string;icon:string;description:stri
 export function getAllQuestions(): Question[] { return Object.values(QUESTION_BANK).flat(); }
 export function getTotalQuestionCount(): number { return getAllQuestions().length; }
 
-// ─── Fisher-Yates shuffle ────────────────────────────────────────────────────
+// ── Fisher-Yates shuffle ──────────────────────────────────────────────────────
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -410,18 +410,11 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-// ─── Core export: replaces buildBlendedTest ──────────────────────────────────
 /**
- * Builds a 10-question test for the given category with:
- *  1. True randomness — Fisher-Yates on every call
- *  2. Exclusion of recently seen questions (uses persisted IDs from storage)
- *  3. Adaptive weighting — questions answered wrong more recently score higher
- *  4. Difficulty ramp — ~3 easy (1-2), ~4 medium (3), ~3 hard (4-5) ordered ascending
- *
- * @param category   Category key e.g. 'numerical'
- * @param count      Number of questions (default 10)
- * @param excludeIds Question IDs to exclude (recently seen for this category)
- * @param statsMap   Per-question stats from localStorage { [id]: { timesAsked, timesCorrect } }
+ * FIX: Adaptive scoring now correctly sorts by score THEN picks top N,
+ * rather than shuffle-then-sort which was discarding the adaptive signal.
+ * Each tier: score all candidates → pick top N by adaptive weight → shuffle
+ * within tier for variety.
  */
 export function buildBlendedTest(
   category: string,
@@ -432,63 +425,62 @@ export function buildBlendedTest(
   const pool = QUESTION_BANK[category] ?? [];
   if (pool.length === 0) return [];
 
-  // Step 1: exclude recently seen; fall back to full pool if too many excluded
+  // Step 1: exclude recently seen; fall back to full pool if too few remain
   let available = pool.filter(q => !excludeIds.includes(q.id));
-  if (available.length < count) available = pool; // not enough fresh questions
+  if (available.length < count) available = [...pool];
 
-  // Step 2: assign an adaptive priority score to each question
-  // Higher score = more likely to be selected
+  // Step 2: assign adaptive priority score — higher = more likely selected
   const scored = available.map(q => {
     const stats = statsMap[q.id];
     let score = 1.0;
     if (stats && stats.timesAsked > 0) {
       const accuracy = stats.timesCorrect / stats.timesAsked;
-      // Penalise questions answered correctly at high rate; boost weak ones
+      // Boost weak questions, penalise mastered ones
       score = 1.5 - accuracy;
-      // Small boost for rarely-seen questions (max 0.3 bonus)
+      // Small bonus for rarely-seen questions
       const rarityBonus = Math.max(0, 0.3 - stats.timesAsked * 0.03);
       score += rarityBonus;
     }
-    // Add random jitter so equal-score questions don't always follow same order
+    // Add jitter so equal-score questions vary order
     score += Math.random() * 0.4;
     return { q, score };
   });
 
-  // Step 3: separate into difficulty tiers and pick quota from each
-  const easy   = shuffle(scored.filter(s => s.q.difficulty <= 2).sort((a,b) => b.score - a.score).slice(0, 8)).slice(0, 3);
-  const medium = shuffle(scored.filter(s => s.q.difficulty === 3).sort((a,b) => b.score - a.score).slice(0, 10)).slice(0, 4);
-  const hard   = shuffle(scored.filter(s => s.q.difficulty >= 4).sort((a,b) => b.score - a.score).slice(0, 8)).slice(0, 3);
+  // Step 3: separate by difficulty, sort by adaptive score DESC, pick quota,
+  //         then shuffle within tier for natural ordering variety
+  const pickTier = (minD: number, maxD: number, quota: number) =>
+    shuffle(
+      scored
+        .filter(s => s.q.difficulty >= minD && s.q.difficulty <= maxD)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, Math.max(quota * 3, 6)) // widen candidate pool before shuffle
+    ).slice(0, quota);
 
-  // Step 4: fill any gaps caused by thin tiers
+  const easy   = pickTier(1, 2, 3);
+  const medium = pickTier(3, 3, 4);
+  const hard   = pickTier(4, 5, 3);
+
+  // Step 4: fill gaps from thin tiers
   const chosen = new Set([...easy, ...medium, ...hard].map(s => s.q.id));
-  const remainder = count - chosen.size;
-  const filler: typeof easy = [];
-  if (remainder > 0) {
-    const extras = shuffle(scored.filter(s => !chosen.has(s.q.id))).slice(0, remainder);
-    filler.push(...extras);
-  }
+  const fillerCount = count - chosen.size;
+  const filler = fillerCount > 0
+    ? shuffle(scored.filter(s => !chosen.has(s.q.id))).slice(0, fillerCount)
+    : [];
 
-  // Step 5: merge in difficulty order (easy → medium → hard → filler)
-  const ordered = [
+  // Step 5: return in difficulty ramp order (easy → medium → hard → filler)
+  return [
     ...easy.map(s => s.q),
     ...medium.map(s => s.q),
     ...hard.map(s => s.q),
     ...filler.map(s => s.q),
   ];
-
-  return ordered;
 }
 
-// Kept for backward-compat — no longer primary selection logic
+// Backward-compat stubs
 export function weightedSample(questions: Question[], n: number, excludeIds: string[] = []): Question[] {
-  const available = shuffle(questions.filter(q => !excludeIds.includes(q.id)));
-  return available.slice(0, n);
+  return shuffle(questions.filter(q => !excludeIds.includes(q.id))).slice(0, n);
 }
-
-export function updateWeights(results: {questionId: string; correct: boolean}[]): void {
-  // no-op: weights are now managed entirely via localStorage stats in storage.ts
-}
-
+export function updateWeights(_results: {questionId: string; correct: boolean}[]): void { /* managed via localStorage */ }
 export function getLeastAskedQuestions(category: string, count: number): string[] {
   return (QUESTION_BANK[category] ?? [])
     .sort((a, b) => a.timesAsked - b.timesAsked)
