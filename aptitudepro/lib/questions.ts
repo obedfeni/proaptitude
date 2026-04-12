@@ -149,7 +149,21 @@ export function buildQuestionBank(): QuestionBank {
   addQ('numerical',{difficulty:3,question:"After two years of 10% annual depreciation, the value of a Rs. 50,000 asset is:",options:["Rs. 40,000","Rs. 40,500","Rs. 41,500","Rs. 42,500"],correct:1,explanation:"50000×0.9² = 50000×0.81 = Rs. 40,500"});
   addQ('numerical',{difficulty:4,question:"Three letters are randomly selected from {A,B,C,D,E} without repetition. How many ways?",options:["10","20","60","120"],correct:2,explanation:"P(5,3) = 5×4×3 = 60 ordered selections"});
   addQ('numerical',{difficulty:3,question:"A number is chosen from 1–20. P(prime or even) is:",options:["3/4","4/5","17/20","7/10"],correct:2,explanation:"Primes(8) + Evens(10) – overlap(2 only)=1 → 17. P=17/20"});
-
+  addQ('numerical',{
+  difficulty:3,
+  question:"A population increases from 50,000 to 60,000. What is the percentage increase?",
+  options:["15%","18%","20%","25%"],
+  correct:2,
+  explanation:"Increase = 10,000. (10,000/50,000)×100 = 20%"
+});
+  addQ('numerical',{
+  difficulty:3,
+  question:"If a value decreases from 200 to 150, the percentage decrease is:",
+  options:["20%","25%","30%","35%"],
+  correct:1,
+  explanation:"Decrease = 50. (50/200)×100 = 25%"
+});
+  
   // ==================== VERBAL (18 questions) ====================
   addQ('verbal',{difficulty:2,passage:CLOUD_P,question:"The primary advantage of cloud computing mentioned is:",options:["Enhanced security","Elastic scaling capability","Reduced environmental impact","GDPR compliance"],correct:1,explanation:"The passage states organisations can benefit from elastic scaling."});
   addQ('verbal',{difficulty:3,passage:CLOUD_P,question:"According to the passage, what forced providers to invest in regional infrastructure?",options:["Cost reduction","Data sovereignty concerns","GDPR regulations","Vendor lock-in issues"],correct:2,explanation:"GDPR forced providers to invest in regional infrastructure and compliance certifications."});
@@ -503,6 +517,69 @@ addQ('verbal',{
   addQ('electrical',{difficulty:5,question:"Firing angle in SCR controls:",options:["Voltage output","Frequency","Resistance","Inductance"],correct:0,explanation:"Adjusting firing angle controls average output voltage."});
   addQ('electrical',{difficulty:5,question:"In a chopper circuit, duty cycle controls:",options:["Frequency","Output voltage","Current ripple","Switching loss"],correct:1,explanation:"Vout proportional to duty cycle."});
   addQ('electrical',{difficulty:5,question:"An inverter converts:",options:["AC to DC","DC to AC","AC to AC","DC to DC"],correct:1,explanation:"Inverters convert DC into AC power."});
+  addQ('electrical',{
+  difficulty:5,
+  question:"In an induction motor, the slip at maximum torque is proportional to:",
+  options:["Rotor resistance", "Stator voltage", "Supply frequency", "Power factor"],
+  correct:0,
+  explanation:"Slip at maximum torque is directly proportional to rotor resistance."
+});addQ('electrical',{
+  difficulty:5,
+  question:"Starting torque of a single-phase induction motor is zero because:",
+  options:["No back EMF", "Single-phase supply produces no rotating field", "High resistance", "Low frequency"],
+  correct:1,
+  explanation:"Single-phase supply creates pulsating field, not rotating field."
+});
+  addQ('electrical',{
+  difficulty:5,
+  question:"In a synchronous motor, increasing load causes:",
+  options:["Speed decrease", "Increase in torque angle", "Loss of synchronism immediately", "Frequency change"],
+  correct:1,
+  explanation:"Load increase increases torque angle (load angle δ)."
+});
+  addQ('electrical',{
+  difficulty:5,
+  question:"Transformer regulation is maximum when power factor is:",
+  options:["Unity", "Leading", "Lagging", "Zero"],
+  correct:2,
+  explanation:"Voltage drop is highest at lagging power factor due to leakage reactance."
+});
+  addQ('electrical',{
+  difficulty:5,
+  question:"Hysteresis loss in a transformer depends on:",
+  options:["Voltage only", "Frequency and flux density", "Current", "Load current"],
+  correct:1,
+  explanation:"Hysteresis loss depends on frequency and max flux density."
+});
+  addQ('electrical',{
+  difficulty:5,
+  question:"The most economical voltage level for transmission depends mainly on:",
+  options:["Current only", "Distance and power level", "Resistance", "Frequency"],
+  correct:1,
+  explanation:"Higher voltage is chosen based on distance and power to reduce losses."
+});
+  addQ('electrical',{
+  difficulty:5,
+  question:"Load factor is defined as:",
+  options:["Max load / average load", "Average load / peak load", "Peak load / average load", "Energy / max demand"],
+  correct:1,
+  explanation:"Load factor = average load divided by peak load."
+});
+  addQ('electrical',{
+  difficulty:5,
+  question:"A Buchholz relay is used in:",
+  options:["Circuit breakers", "Overhead lines", "Oil-immersed transformers", "Generators"],
+  correct:2,
+  explanation:"It detects internal faults in oil-immersed transformers."
+});
+  addQ('electrical',{
+  difficulty:5,
+  question:"Arc extinction in circuit breakers is primarily achieved by:",
+  options:["Increasing voltage", "Cooling and deionization", "Increasing current", "Reducing resistance"],
+  correct:1,
+  explanation:"Arc is extinguished by cooling and deionizing the medium."
+});
+  
   addQ('electrical',{difficulty:5,question:"PWM technique is used to:",options:["Reduce voltage only","Control power efficiently","Increase resistance","Eliminate harmonics completely"],correct:1,explanation:"PWM improves efficiency and controls output."});
 
   return bank;
