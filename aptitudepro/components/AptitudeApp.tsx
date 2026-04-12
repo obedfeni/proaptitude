@@ -1,13 +1,13 @@
 'use client';
 import { createSelfGeneratingBank } from '@/lib/selfGeneratingBank';
-import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Play, 
-  BarChart3, 
-  BookOpen, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import {
+  Play,
+  BarChart3,
+  BookOpen,
+  CheckCircle,
+  XCircle,
+  Clock,
   Trophy,
   Brain,
   ChevronRight,
@@ -19,38 +19,35 @@ import {
   Zap,
   ChevronLeft,
   Info,
-  X
 } from 'lucide-react';
-import { 
-  QUESTION_BANK, 
-  CATEGORIES, 
-  Question, 
-  buildBlendedTest, 
-  updateWeights,
-  getTotalQuestionCount 
+import {
+  QUESTION_BANK,
+  CATEGORIES,
+  Question,
+  getTotalQuestionCount,
 } from '@/lib/questions';
-import { 
-  loadData, 
-  saveData, 
-  addTestResult, 
+import {
+  addTestResult,
   updateQuestionStats,
   getAnalytics,
   getRecentlyAskedQuestions,
   getCategoryStatsMap,
-  TestResult 
+  TestResult,
 } from '@/lib/storage';
 import { AnalyticsPage } from './AnalyticsPage';
 
 type View = 'home' | 'test' | 'result' | 'analytics' | 'guide';
 
 export function AptitudeApp() {
-  const bank = createSelfGeneratingBank();
+  // ── FIX 1: Stable bank instance — never re-created on re-render ──────────
+  // useMemo with [] ensures this runs exactly once per component mount.
+  const bank = useMemo(() => createSelfGeneratingBank(), []);
+
   const [view, setView] = useState<View>('home');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
-  const [answers, setAnswers] = useState<{ questionId: string; correct: boolean; selectedOption: number }[]>([]);
   const [timeLeft, setTimeLeft] = useState(0);
   const [testStarted, setTestStarted] = useState(false);
   const [results, setResults] = useState<TestResult | null>(null);
@@ -58,49 +55,114 @@ export function AptitudeApp() {
   const [showExplanation, setShowExplanation] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
 
+  // ── FIX 2: Track answers in a ref so finishTest always sees current value ─
+  // React state updates are async; a ref is synchronous and avoids stale closures.
+  const answersRef = useRef<{ questionId: string; correct: boolean; selectedOption: number }[]>([]);
+  // Mirror ref into state purely for UI rendering (answer review panel).
+  const [answersState, setAnswersState] = useState<typeof answersRef.current>([]);
+
+  // ── FIX 3: evolveAndImprove moved OUT of render body ────────────────────
+  // Side effects must never run during the render phase.
   useEffect(() => {
     setAnalytics(getAnalytics());
-  }, []);
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (testStarted && timeLeft > 0) {
-      timer = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) {
-            finishTest();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+    // Run evolution after mount — intentionally fire-and-forget (no UI needed)
+    const evolved = bank.evolveAndImprove();
+    if (evolved.length > 0) {
+      console.log(`[AptitudePro] ${evolved.length} question(s) evolved this session.`);
     }
-    return () => clearInterval(timer);
-  }, [testStarted, timeLeft]);
+  }, [bank]);
 
-  const startTest = (category: string) => {
+  // ── FIX 4: Timer — only depends on testStarted, NOT timeLeft ────────────
+  // Including timeLeft in the dep array caused the interval to be torn down
+  // and re-created every second, causing timing drift and stale-closure issues.
+  useEffect(() => {
+    if (!testStarted) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          // Schedule finishTest outside the setState callback to avoid
+          // calling it during a render cycle.
+          setTimeout(finishTest, 0);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [testStarted]);
+  // NOTE: finishTest is intentionally excluded from deps here. It reads from
+  // answersRef (a ref, always current) so no stale-closure risk. Adding it
+  // would restart the timer on every render.
+
+  // ── finishTest reads from the ref — always has latest answers ────────────
+  const finishTest = useCallback(() => {
+    // Grab the up-to-date answers from the ref (not from state)
+    const currentAnswers = answersRef.current;
+    const correctCount = currentAnswers.filter(a => a.correct).length;
+
+    setTestStarted(false);
+
+    setTimeLeft(prev => {
+      const totalTime = (questions.length * 40) - prev;
+
+      const result: TestResult = {
+        id: Date.now().toString(),
+        category: selectedCategory,
+        score: correctCount,
+        totalQuestions: questions.length,
+        percentage: questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0,
+        timeSpent: totalTime,
+        timestamp: new Date().toISOString(),
+        answers: [...currentAnswers],
+      };
+
+      addTestResult(result);
+      setResults(result);
+      setView('result');
+      setAnalytics(getAnalytics());
+
+      return prev; // timeLeft unchanged by this setState
+    });
+  }, [questions, selectedCategory]);
+
+  const startTest = useCallback((category: string) => {
     const recentIds = getRecentlyAskedQuestions(category, 40);
-    const statsMap = getCategoryStatsMap(category);
     const testQuestions = bank.getQuestions(category, 10, recentIds);
     if (testQuestions.length === 0) return;
 
+    // Reset everything synchronously before setting testStarted
+    answersRef.current = [];
+    setAnswersState([]);
     setSelectedCategory(category);
     setQuestions(testQuestions);
     setCurrentIndex(0);
-    setAnswers([]);
     setTimeLeft(testQuestions.length * 40);
-    setTestStarted(true);
-    setView('test');
     setSelectedOption(null);
     setShowExplanation(false);
     setIsCorrect(null);
-  };
+    setResults(null);
+    // Start timer last — ensures all state is reset before ticking begins
+    setTestStarted(true);
+    setView('test');
+  }, [bank]);
 
-  const handleAnswer = (optionIndex: number) => {
+  // ── FIX 5: handleAnswer writes to ref SYNCHRONOUSLY before any navigation
+  // This guarantees finishTest (called from nextQuestion) always sees all answers.
+  const handleAnswer = useCallback((optionIndex: number) => {
     if (selectedOption !== null) return;
 
     const currentQ = questions[currentIndex];
+    if (!currentQ) return;
     const correct = optionIndex === currentQ.correct;
+
+    // Write to ref synchronously — safe for finishTest to read immediately
+    const newAnswer = { questionId: currentQ.id, correct, selectedOption: optionIndex };
+    answersRef.current = [...answersRef.current, newAnswer];
+    // Mirror to state for UI (async is fine for rendering)
+    setAnswersState([...answersRef.current]);
 
     setSelectedOption(optionIndex);
     setIsCorrect(correct);
@@ -108,15 +170,9 @@ export function AptitudeApp() {
 
     updateQuestionStats(currentQ.id, correct, currentQ.category);
     bank.recordAnswer(currentQ.id, correct, currentQ.category);
+  }, [selectedOption, questions, currentIndex, bank]);
 
-    setAnswers(prev => [...prev, {
-      questionId: currentQ.id,
-      correct,
-      selectedOption: optionIndex
-    }]);
-  };
-
-  const nextQuestion = () => {
+  const nextQuestion = useCallback(() => {
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(prev => prev + 1);
       setSelectedOption(null);
@@ -125,37 +181,18 @@ export function AptitudeApp() {
     } else {
       finishTest();
     }
-  };
-
-  const finishTest = () => {
-    const correctCount = answers.filter(a => a.correct).length;
-    const totalTime = (questions.length * 40) - timeLeft;
-
-    const result: TestResult = {
-      id: Date.now().toString(),
-      category: selectedCategory,
-      score: correctCount,
-      totalQuestions: questions.length,
-      percentage: Math.round((correctCount / questions.length) * 100),
-      timeSpent: totalTime,
-      timestamp: new Date().toISOString(),
-      answers
-    };
-
-    addTestResult(result);
-    setResults(result);
-    setTestStarted(false);
-    setView('result');
-    setAnalytics(getAnalytics());
-  };
+  }, [currentIndex, questions.length, finishTest]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-const evolved = bank.evolveAndImprove();
-console.log('Evolved questions:', evolved.length);
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // RENDER HELPERS
+  // ─────────────────────────────────────────────────────────────────────────
+
   const renderHome = () => (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header */}
@@ -177,7 +214,7 @@ console.log('Evolved questions:', evolved.length);
                 {analytics.streakDays} day streak
               </div>
             )}
-            <button 
+            <button
               onClick={() => setView('analytics')}
               className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
             >
@@ -228,19 +265,19 @@ console.log('Evolved questions:', evolved.length);
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white mb-8 shadow-xl">
           <h2 className="text-3xl font-bold mb-3">Master Your Aptitude Tests</h2>
           <p className="text-blue-100 text-lg mb-6 max-w-2xl">
-            Practice with 200+ questions across 12 categories including Numerical, Verbal, Logical, 
-            Mechanical, Electrical Engineering, and Situational Judgment. Adaptive learning ensures 
+            Practice with 200+ questions across 12 categories including Numerical, Verbal, Logical,
+            Mechanical, Electrical Engineering, and Situational Judgment. Adaptive learning ensures
             you focus on areas that need improvement.
           </p>
           <div className="flex flex-wrap gap-3">
-            <button 
+            <button
               onClick={() => document.getElementById('categories')?.scrollIntoView({ behavior: 'smooth' })}
               className="px-6 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors flex items-center gap-2"
             >
               <Play className="w-5 h-5" />
               Start Practice
             </button>
-            <button 
+            <button
               onClick={() => setView('guide')}
               className="px-6 py-3 bg-blue-700 text-white rounded-lg font-semibold hover:bg-blue-800 transition-colors flex items-center gap-2"
             >
@@ -263,7 +300,7 @@ console.log('Evolved questions:', evolved.length);
                 className="group bg-white rounded-xl p-5 border border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all text-left"
               >
                 <div className="flex items-start justify-between mb-3">
-                  <div 
+                  <div
                     className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
                     style={{ backgroundColor: cat.color + '20' }}
                   >
@@ -280,11 +317,11 @@ console.log('Evolved questions:', evolved.length);
                 {performance && (
                   <div className="flex items-center gap-2 text-sm">
                     <div className="flex-1 bg-slate-100 rounded-full h-2">
-                      <div 
+                      <div
                         className="h-2 rounded-full transition-all"
-                        style={{ 
-                          width: `${performance.avg}%`, 
-                          backgroundColor: cat.color 
+                        style={{
+                          width: `${performance.avg}%`,
+                          backgroundColor: cat.color,
                         }}
                       />
                     </div>
@@ -311,8 +348,11 @@ console.log('Evolved questions:', evolved.length);
         <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-10">
           <div className="max-w-4xl mx-auto px-4 py-4">
             <div className="flex items-center justify-between mb-4">
-              <button 
-                onClick={() => setView('home')}
+              <button
+                onClick={() => {
+                  setTestStarted(false);
+                  setView('home');
+                }}
                 className="flex items-center gap-2 text-slate-600 hover:text-slate-900"
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -332,7 +372,7 @@ console.log('Evolved questions:', evolved.length);
                 {currentIndex + 1} / {questions.length}
               </span>
               <div className="flex-1 bg-slate-100 rounded-full h-2">
-                <div 
+                <div
                   className="h-2 bg-blue-600 rounded-full transition-all"
                   style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
                 />
@@ -347,11 +387,11 @@ console.log('Evolved questions:', evolved.length);
             {/* Question Header */}
             <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
               <div className="flex items-center gap-3">
-                <span 
+                <span
                   className="px-3 py-1 rounded-full text-xs font-medium"
-                  style={{ 
+                  style={{
                     backgroundColor: CATEGORIES[currentQ.category]?.color + '20',
-                    color: CATEGORIES[currentQ.category]?.color 
+                    color: CATEGORIES[currentQ.category]?.color,
                   }}
                 >
                   {CATEGORIES[currentQ.category]?.name}
@@ -363,24 +403,24 @@ console.log('Evolved questions:', evolved.length);
             </div>
 
             <div className="p-6">
-              {/* Passage if exists */}
+              {/* Passage */}
               {currentQ.passage && (
                 <div className="mb-6 p-4 bg-slate-50 rounded-lg border-l-4 border-blue-500">
                   <p className="text-slate-700 text-sm leading-relaxed">{currentQ.passage}</p>
                 </div>
               )}
 
-              {/* Table if exists */}
+              {/* Table */}
               {currentQ.table && (
-                <div 
+                <div
                   className="mb-6 overflow-x-auto bg-white rounded-lg border border-slate-200 p-4"
                   dangerouslySetInnerHTML={{ __html: currentQ.table }}
                 />
               )}
 
-              {/* Diagram if exists */}
+              {/* Diagram */}
               {currentQ.diagram && (
-                <div 
+                <div
                   className="mb-6 flex justify-center"
                   dangerouslySetInnerHTML={{ __html: currentQ.diagram }}
                   style={{ minHeight: '200px' }}
@@ -395,16 +435,15 @@ console.log('Evolved questions:', evolved.length);
               {/* Options */}
               <div className="space-y-3">
                 {currentQ.options.map((option, idx) => {
-                  let buttonClass = "w-full p-4 rounded-xl border-2 text-left transition-all ";
-
+                  let buttonClass = 'w-full p-4 rounded-xl border-2 text-left transition-all ';
                   if (selectedOption === null) {
-                    buttonClass += "border-slate-200 hover:border-blue-400 hover:bg-blue-50";
+                    buttonClass += 'border-slate-200 hover:border-blue-400 hover:bg-blue-50';
                   } else if (idx === currentQ.correct) {
-                    buttonClass += "border-green-500 bg-green-50";
+                    buttonClass += 'border-green-500 bg-green-50';
                   } else if (idx === selectedOption) {
-                    buttonClass += "border-red-500 bg-red-50";
+                    buttonClass += 'border-red-500 bg-red-50';
                   } else {
-                    buttonClass += "border-slate-200 opacity-50";
+                    buttonClass += 'border-slate-200 opacity-50';
                   }
 
                   return (
@@ -433,7 +472,13 @@ console.log('Evolved questions:', evolved.length);
 
               {/* Explanation */}
               {showExplanation && (
-                <div className={`mt-6 p-4 rounded-xl ${isCorrect ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+                <div
+                  className={`mt-6 p-4 rounded-xl ${
+                    isCorrect
+                      ? 'bg-green-50 border border-green-200'
+                      : 'bg-red-50 border border-red-200'
+                  }`}
+                >
                   <div className="flex items-start gap-3">
                     {isCorrect ? (
                       <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
@@ -475,7 +520,7 @@ console.log('Evolved questions:', evolved.length);
       <div className="min-h-screen bg-slate-50">
         <header className="bg-white shadow-sm border-b border-slate-200">
           <div className="max-w-4xl mx-auto px-4 py-4">
-            <button 
+            <button
               onClick={() => setView('home')}
               className="flex items-center gap-2 text-slate-600 hover:text-slate-900"
             >
@@ -488,10 +533,12 @@ console.log('Evolved questions:', evolved.length);
         <main className="max-w-4xl mx-auto px-4 py-8">
           <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
             {/* Result Header */}
-            <div 
+            <div
               className="p-8 text-center text-white"
-              style={{ 
-                background: `linear-gradient(135deg, ${category?.color || '#3b82f6'}, ${category?.color ? category.color + 'dd' : '#2563eb'})` 
+              style={{
+                background: `linear-gradient(135deg, ${category?.color || '#3b82f6'}, ${
+                  category?.color ? category.color + 'dd' : '#2563eb'
+                })`,
               }}
             >
               <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -507,10 +554,10 @@ console.log('Evolved questions:', evolved.length);
                 <div className="relative w-40 h-40">
                   <svg className="w-full h-full transform -rotate-90">
                     <circle cx="80" cy="80" r="70" stroke="#e2e8f0" strokeWidth="12" fill="none" />
-                    <circle 
-                      cx="80" cy="80" r="70" 
-                      stroke={category?.color || '#3b82f6'} 
-                      strokeWidth="12" 
+                    <circle
+                      cx="80" cy="80" r="70"
+                      stroke={category?.color || '#3b82f6'}
+                      strokeWidth="12"
                       fill="none"
                       strokeDasharray={`${(results.percentage / 100) * 440} 440`}
                       strokeLinecap="round"
@@ -546,12 +593,22 @@ console.log('Evolved questions:', evolved.length);
               <h3 className="font-bold text-slate-900 mb-4">Answer Review</h3>
               <div className="space-y-3">
                 {results.answers.map((answer, idx) => (
-                  <div 
+                  <div
                     key={idx}
-                    className={`p-4 rounded-xl border ${answer.correct ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}
+                    className={`p-4 rounded-xl border ${
+                      answer.correct
+                        ? 'border-green-200 bg-green-50'
+                        : 'border-red-200 bg-red-50'
+                    }`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${answer.correct ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>
+                      <span
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                          answer.correct
+                            ? 'bg-green-200 text-green-800'
+                            : 'bg-red-200 text-red-800'
+                        }`}
+                      >
                         {idx + 1}
                       </span>
                       <div className="flex-1">
@@ -597,7 +654,7 @@ console.log('Evolved questions:', evolved.length);
     <div className="min-h-screen bg-slate-50">
       <header className="bg-white shadow-sm border-b border-slate-200">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <button 
+          <button
             onClick={() => setView('home')}
             className="flex items-center gap-2 text-slate-600 hover:text-slate-900"
           >
@@ -619,7 +676,7 @@ console.log('Evolved questions:', evolved.length);
             <ul className="space-y-2 text-slate-700">
               <li>• Read questions carefully before looking at options</li>
               <li>• Eliminate obviously wrong answers first</li>
-              <li>• Manage your time - don't spend too long on one question</li>
+              <li>• Manage your time — don't spend too long on one question</li>
               <li>• For numerical questions, check units and scales</li>
               <li>• Review explanations to understand your mistakes</li>
             </ul>
@@ -656,9 +713,9 @@ console.log('Evolved questions:', evolved.length);
               About This App
             </h3>
             <p className="text-slate-700 leading-relaxed">
-              AptitudePro features 200+ questions across 12 categories including specialized sections 
-              for Electrical Engineering graduates. The adaptive learning system tracks your performance 
-              and prioritizes questions you find challenging. Your progress is automatically saved 
+              AptitudePro features 200+ questions across 12 categories including specialised sections
+              for Electrical Engineering graduates. The adaptive learning system tracks your performance
+              and prioritises questions you find challenging. Your progress is automatically saved
               to your browser's local storage.
             </p>
           </div>
@@ -667,13 +724,16 @@ console.log('Evolved questions:', evolved.length);
     </div>
   );
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // ROOT RENDER
+  // ─────────────────────────────────────────────────────────────────────────
   return (
     <>
-      {view === 'home' && renderHome()}
-      {view === 'test' && renderTest()}
-      {view === 'result' && renderResult()}
+      {view === 'home'      && renderHome()}
+      {view === 'test'      && renderTest()}
+      {view === 'result'    && renderResult()}
       {view === 'analytics' && <AnalyticsPage onBack={() => setView('home')} />}
-      {view === 'guide' && renderGuide()}
+      {view === 'guide'     && renderGuide()}
     </>
   );
 }
