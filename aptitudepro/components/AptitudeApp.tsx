@@ -107,7 +107,7 @@ export function AptitudeApp() {
     setShowExplanation(true);
 
     updateQuestionStats(currentQ.id, correct, currentQ.category);
-    bank.recordAnswer(currentQ.id, correct, 40000 - timeLeft);
+    bank.recordAnswer(currentQ.id, correct, currentQ.category);
 
     setAnswers(prev => [...prev, {
       questionId: currentQ.id,
