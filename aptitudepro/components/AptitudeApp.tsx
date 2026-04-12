@@ -1,5 +1,5 @@
 'use client';
-
+import { createSelfGeneratingBank } from '@/lib/selfGeneratingBank';
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Play, 
@@ -44,6 +44,7 @@ import { AnalyticsPage } from './AnalyticsPage';
 type View = 'home' | 'test' | 'result' | 'analytics' | 'guide';
 
 export function AptitudeApp() {
+  const bank = createSelfGeneratingBank();
   const [view, setView] = useState<View>('home');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -80,7 +81,7 @@ export function AptitudeApp() {
   const startTest = (category: string) => {
     const recentIds = getRecentlyAskedQuestions(category, 40);
     const statsMap = getCategoryStatsMap(category);
-    const testQuestions = buildBlendedTest(category, 10, recentIds, statsMap);
+    const testQuestions = bank.getQuestions(category, 10, recentIds);
     if (testQuestions.length === 0) return;
 
     setSelectedCategory(category);
@@ -106,6 +107,7 @@ export function AptitudeApp() {
     setShowExplanation(true);
 
     updateQuestionStats(currentQ.id, correct, currentQ.category);
+    bank.recordAnswer(currentQ.id, correct, 40000 - timeLeft);
 
     setAnswers(prev => [...prev, {
       questionId: currentQ.id,
@@ -152,7 +154,8 @@ export function AptitudeApp() {
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
+const evolved = bank.evolveAndImprove();
+console.log('Evolved questions:', evolved.length);
   const renderHome = () => (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header */}
