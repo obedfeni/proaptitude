@@ -169,7 +169,135 @@ export function buildQuestionBank(): QuestionBank {
   addQ('verbal',{difficulty:3,question:"To _______ is to renounce a throne.",options:["Abdicate","Abolish","Abrogate","Abscond"],correct:0,explanation:"Abdicate means to renounce a throne or high office."});
   addQ('verbal',{difficulty:2,question:"Choose the best word to replace 'very good':",options:["Superb","Adequate","Passable","Mediocre"],correct:0,explanation:"Superb is a precise strong positive adjective."});
   addQ('verbal',{difficulty:3,question:"Choose the correct sentence:",options:["The data is clear","The data are clear","Both are acceptable","Neither is correct"],correct:2,explanation:"'Data' can be treated as singular or plural in modern usage — both are acceptable."});
+  addQ('verbal',{
+  difficulty:5,
+  question:"A company increases automation and reports higher profits. Which is the strongest hidden assumption in concluding automation caused the profit increase?",
+  options:[
+    "Profits were increasing before automation",
+    "No other major cost-cutting measures occurred simultaneously",
+    "Automation always reduces costs",
+    "Employees did not resist automation"
+  ],
+  correct:1,
+  explanation:"To attribute causation to automation, we must assume no other major confounding factors affected profits."
+});
 
+addQ('verbal',{
+  difficulty:4,
+  question:"Which statement most weakens: 'Increasing minimum wage reduces unemployment because it increases consumer spending'?",
+  options:[
+    "Consumer spending increases economic activity",
+    "Some businesses reduce hiring due to higher labor costs",
+    "Minimum wage varies across countries",
+    "Unemployment rates fluctuate seasonally"
+  ],
+  correct:1,
+  explanation:"Higher labor costs leading to reduced hiring directly weakens the causal claim."
+});
+
+addQ('verbal',{
+  difficulty:5,
+  question:"If all policy reforms that reduce inflation also slow economic growth, what can be logically concluded?",
+  options:[
+    "All inflation-reducing policies are harmful",
+    "Some inflation reduction may involve trade-offs with growth",
+    "Economic growth causes inflation",
+    "Inflation and growth are unrelated"
+  ],
+  correct:1,
+  explanation:"The statement implies a consistent trade-off relationship."
+});
+
+addQ('verbal',{
+  difficulty:4,
+  question:"Choose the best synonym for 'obfuscate':",
+  options:[
+    "Clarify",
+    "Confuse",
+    "Simplify",
+    "Reveal"
+  ],
+  correct:1,
+  explanation:"Obfuscate means to deliberately make something unclear."
+});
+
+addQ('verbal',{
+  difficulty:5,
+  question:"Which sentence contains a subtle grammatical error?",
+  options:[
+    "Neither of the answers are correct.",
+    "Each of the students is responsible for their work.",
+    "The data suggest a strong correlation.",
+    "He insisted that she be present."
+  ],
+  correct:0,
+  explanation:"'Neither' is singular; correct form is 'is correct'."
+});
+
+addQ('verbal',{
+  difficulty:4,
+  question:"Which inference is most reasonable: 'Despite increased funding, test scores remained unchanged across schools.'",
+  options:[
+    "Funding was ineffective in all cases",
+    "Increased funding did not directly translate into improved test scores",
+    "Schools misused all additional funds",
+    "Test scores are unrelated to education quality"
+  ],
+  correct:1,
+  explanation:"The statement only supports lack of observable effect, not total ineffectiveness."
+});
+
+addQ('verbal',{
+  difficulty:5,
+  question:"A policy analyst argues: 'Since countries with high education spending have high GDP, increasing education spending will increase GDP.' What is the main flaw?",
+  options:[
+    "Overgeneralization",
+    "Correlation implies causation",
+    "False dilemma",
+    "Circular reasoning"
+  ],
+  correct:1,
+  explanation:"It incorrectly assumes correlation equals causation."
+});
+
+addQ('verbal',{
+  difficulty:4,
+  question:"Select the best word to complete: 'The scientist's theory was so ______ that it accounted for every anomaly without contradiction.'",
+  options:[
+    "coherent",
+    "inconsistent",
+    "fragile",
+    "ambiguous"
+  ],
+  correct:0,
+  explanation:"Coherent means logically consistent and unified."
+});
+
+addQ('verbal',{
+  difficulty:5,
+  question:"Which argument is most logically valid?",
+  options:[
+    "If A implies B, and B implies C, then C implies A",
+    "If all A are B, and all B are C, then all A are C",
+    "If some A are B, then all B are A",
+    "If A is true, then not A is also true"
+  ],
+  correct:1,
+  explanation:"This is a valid syllogism (transitive logic)."
+});
+
+addQ('verbal',{
+  difficulty:4,
+  question:"Which sentence best maintains formal academic tone?",
+  options:[
+    "The results kinda show a big improvement.",
+    "The results clearly show significant improvement.",
+    "The results are pretty much better.",
+    "The results show a lot better outcomes, honestly."
+  ],
+  correct:1,
+  explanation:"Formal tone avoids slang and subjective intensifiers."
+});
   // ==================== LOGICAL (20 questions) ====================
   addQ('logical',{difficulty:2,question:"If all Bloops are Razzies and all Razzies are Lazzies, then:",options:["All Bloops are Lazzies","All Lazzies are Bloops","Some Lazzies are not Razzies","No Razzies are Bloops"],correct:0,explanation:"By syllogism: A→B and B→C implies A→C."});
   addQ('logical',{difficulty:3,question:"Complete the series: 2, 6, 12, 20, 30, ?",options:["38","40","42","44"],correct:2,explanation:"Pattern: n(n+1). 6×7 = 42."});
